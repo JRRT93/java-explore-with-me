@@ -31,19 +31,17 @@ public class StatServiceImpl implements StatService {
         if (start.isAfter(end)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect request. Start date cant be after end date");
         }
-
-        List<StatRecordOut> statRecords;
         if (isUnique) {
             if (uris != null) {
-                statRecords = repository.findStatRecordUniqueIpWithUri(uris, start, end);
+                return repository.findStatRecordUniqueIpWithUri(uris, start, end);
             }
-            statRecords = repository.findStatRecordUniqueIpNoUri(start, end);
+            return repository.findStatRecordUniqueIpNoUri(start, end);
+
         } else {
             if (uris != null) {
-                statRecords = repository.findAllStatRecordWithUri(uris, start, end);
+                return repository.findAllStatRecordWithUri(uris, start, end);
             }
-            statRecords = repository.findAllStatRecordNoUri(start, end);
+            return repository.findAllStatRecordNoUri(start, end);
         }
-        return statRecords;
     }
 }

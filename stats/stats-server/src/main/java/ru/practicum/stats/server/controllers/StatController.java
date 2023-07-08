@@ -21,11 +21,11 @@ public class StatController {
     @GetMapping("/stats")
     public List<StatRecordOut> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                        @RequestParam(required = false) List<String> urisList,
-                                        @RequestParam(defaultValue = "false") Boolean isUnique) {
-        log.info("/stats REQUEST received. Options: start={}, end={}, urisList={}, isUnique={}",
-                start, end, urisList, isUnique);
-        return service.getAllStatRecords(start, end, urisList, isUnique);
+                                        @RequestParam(required = false) List<String> uris,
+                                        @RequestParam(defaultValue = "false") Boolean unique) {
+        log.info("/stats REQUEST received. Options: start={}, end={}, urisList={}, unique={}",
+                start, end, uris, unique);
+        return service.getAllStatRecords(start, end, uris, unique);
     }
 
     @PostMapping("/hit")
