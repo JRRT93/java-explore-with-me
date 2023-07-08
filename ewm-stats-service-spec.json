@@ -70,7 +70,7 @@
             }
           },
           {
-            "name": "uris",
+            "name": "urisList",
             "in": "query",
             "description": "Список uri для которых нужно выгрузить статистику",
             "required": false,
@@ -82,7 +82,7 @@
             }
           },
           {
-            "name": "unique",
+            "name": "isUnique",
             "in": "query",
             "description": "Нужно ли учитывать только уникальные посещения (только с уникальным ip)",
             "required": false,
