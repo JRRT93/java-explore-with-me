@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestHandler {
-    private static final String REASON_BAD_REQUEST = "Incorrectly made request."; //todo check is important and rewright
+    private static final String REASON = "INCORRECT REQUEST";
 
     @ExceptionHandler
     public ApiError handleNotFoundException(final MethodArgumentTypeMismatchException e) {
         String message = e.getMessage();
         return ApiError.builder()
                 .message(message)
-                .reason(REASON_BAD_REQUEST)
                 .status(HttpStatus.BAD_REQUEST.name())
+                .reason(REASON)
                 .timestamp(LocalDateTime.now())
                 .build();
     }

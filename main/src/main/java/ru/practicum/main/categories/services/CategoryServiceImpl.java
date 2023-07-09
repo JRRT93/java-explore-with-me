@@ -21,7 +21,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public List<CategoryDto> findCategories(Pageable pageable) { //todo засунуть в контроллер
+    public List<CategoryDto> findCategories(Pageable pageable) {
         return repository.findAll(pageable).stream()
                 .map(categoryMapper::modelToDto)
                 .collect(Collectors.toList());

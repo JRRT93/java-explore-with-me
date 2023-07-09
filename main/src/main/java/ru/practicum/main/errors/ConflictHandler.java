@@ -11,14 +11,14 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.CONFLICT)
 public class ConflictHandler {
-    private static final String REASON_INTEGRITY_CONFLICT = "Integrity constraint has been violated."; //todo check is important and rewright
+    private static final String REASON = "REQUEST HAS DATA CONFLICT";
     @ExceptionHandler
     public ApiError handleNotFoundException(final DataIntegrityViolationException e) {
         String message = e.getMessage();
         return ApiError.builder()
                 .message(message)
-                .reason(REASON_INTEGRITY_CONFLICT)
                 .status(HttpStatus.CONFLICT.name())
+                .reason(REASON)
                 .timestamp(LocalDateTime.now())
                 .build();
     }

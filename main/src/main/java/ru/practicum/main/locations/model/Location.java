@@ -1,4 +1,4 @@
-package ru.practicum.main.categories.model;
+package ru.practicum.main.locations.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,11 +12,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "locations")
+public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
-    private String name;
+    @Column(nullable = false)
+    private Float lat;
+    @Column(nullable = false)
+    private Float lon;
 }

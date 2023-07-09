@@ -23,17 +23,16 @@ public class AdminCategoryController {
         return service.save(categoryDto);
     }
 
-    @PatchMapping("/{catId}")
-    public CategoryDto updateCategory(@PathVariable Long catId, @RequestBody @Valid CategoryDto categoryDto) {
-        log.info("PATCH request for /admin/category/{} received. Provided DTO: {}", catId, categoryDto);
-        return service.update(catId, categoryDto);
+    @PatchMapping("/{categoryId}")
+    public CategoryDto updateCategory(@PathVariable Long categoryId, @RequestBody @Valid CategoryDto categoryDto) {
+        log.info("PATCH request for /admin/category/{} received. Provided DTO: {}", categoryId, categoryDto);
+        return service.update(categoryId, categoryDto);
     }
 
-    @DeleteMapping("/{catId}")
+    @DeleteMapping("/{categoryId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long catId) {
-        log.info("DELETE request for /admin/category/{} received", catId);
-        service.deleteById(catId);
-        log.info("Category with ID = {} deleted", catId);
+    public void deleteCategory(@PathVariable Long categoryId) {
+        log.info("DELETE request for /admin/category/{} received", categoryId);
+        service.deleteById(categoryId);
     }
 }
