@@ -1,7 +1,6 @@
 package ru.practicum.stats.server.servises;
 
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatServiceImpl implements StatService {
     private final StatJpaRepository repository;
-    private MapperIn mapperIn = Mappers.getMapper(MapperIn.class);
+    private final MapperIn mapperIn;
 
     @Override
     public void saveStatRecord(StatRecordIn statRecordIn) {
