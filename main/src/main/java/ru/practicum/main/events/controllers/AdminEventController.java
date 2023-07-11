@@ -26,7 +26,7 @@ public class AdminEventController {
     public EventFullDto updateEventByAdmin(@PathVariable Long eventId,
                                            @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         log.info("POST request for /admin/events/{} received. Provided DTO: {}", eventId, updateEventAdminRequest);
-        return service.updateEventByAdmin(eventId, updateEventAdminRequest);
+        return service.updateEventByAdmin(eventId, updateEventAdminRequest); //todo ready
     }
 
     @GetMapping

@@ -2,6 +2,8 @@ package ru.practicum.main.events.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.events.dto.EventFullDto;
@@ -36,30 +38,32 @@ public class PrivateEventController {
         return eventService.saveEvent(userId, newEventDto);
     }
 
+    @GetMapping("/{eventId}")
+    public EventFullDto getEventFullByOwner(@PathVariable Long userId, @PathVariable Long eventId) { //todo ready
+        log.info("GET request for private /users/{}/events/{} received.", userId, eventId);
+        return eventService.getEventFullByOwner(userId, eventId);
+    }
+
     @GetMapping
     List<EventShortDto> getEventShortByOwner(@PathVariable Long userId,
                                              @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
                                              @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
-        log.info("Получаем запрос на список эвентов от пользователя: userId={}, from={}, size={}", userId, from, size);
-        List<EventShortDto> eventShortDtoList = eventService.getEventsShortByOwner(userId, from, size);
-        log.info("Возвращаем {} элемент(а/ов)", eventShortDtoList.size());
-        return eventShortDtoList;
-    }
-
-    @GetMapping("/{eventId}")
-    public EventFullDto getEventFullByOwner(@PathVariable Long userId, @PathVariable Long eventId) {
-        log.info("Получаем запрос на эвент от пользователя: userId={}, eventId={}", userId, eventId);
-        EventFullDto eventFullDto = eventService.getEventFullByOwner(userId, eventId);
-        log.info("Возвращаем eventFullDto={}", eventFullDto);
-        return eventFullDto;
+        log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size); //todo ready
+        Pageable pageable;
+        if (size != null && from != null) {
+            pageable = PageRequest.of(from / size, size);
+        } else {
+            pageable = Pageable.unpaged();
+        }
+        return eventService.getEventsShortByOwner(userId, pageable);
     }
 
     @PatchMapping("/{eventId}")
-    public EventFullDto updateEventByOwner(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody @Valid UpdateEventUserRequest eventUserRequest) {
-        log.info("Получаем запрос на обновление: userId={}, eventId={}, updateEventUserRequest={}", userId, eventId, eventUserRequest);
-        EventFullDto eventFullDto = eventService.updateEventByOwner(userId, eventId, eventUserRequest);
-        log.info("Возвращаем обновленный эвент: eventFullDto={}", eventFullDto);
-        return eventFullDto;
+    public EventFullDto updateEventByOwner(@PathVariable Long userId, @PathVariable Long eventId,
+                                           @RequestBody @Valid UpdateEventUserRequest updateEventUserRequest) {
+        log.info("PATCH request for private /users/{}/events/{} received. Provided DTO: {}",
+                userId, eventId, updateEventUserRequest);
+        return eventService.updateEventByOwner(userId, eventId, updateEventUserRequest); //todo ready
     }
 
     @GetMapping("/{eventId}/requests")

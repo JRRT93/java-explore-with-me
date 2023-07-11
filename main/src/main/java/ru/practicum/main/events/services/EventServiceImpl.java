@@ -7,10 +7,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.main.categories.mappers.CategoryMapper;
 import ru.practicum.main.categories.model.Category;
 import ru.practicum.main.categories.repositories.CategoryJpaRepository;
-import ru.practicum.main.categories.services.CategoryService;
 import ru.practicum.main.events.dto.*;
 import ru.practicum.main.events.enums.AdminStatus;
 import ru.practicum.main.events.enums.PrivateStatus;
@@ -18,6 +16,7 @@ import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.mappers.EventMapper;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.events.repositories.EventJpaRepository;
+import ru.practicum.main.events.utils.EventUpdateUtil;
 import ru.practicum.main.locations.mappers.LocationMapper;
 import ru.practicum.main.locations.model.Location;
 import ru.practicum.main.locations.repositories.LocationJpaRepository;
@@ -41,100 +40,81 @@ public class EventServiceImpl implements EventService {
     private final LocationJpaRepository locationRepository;
 
     private final LocationMapper locationMapper;
-    private final CategoryMapper categoryMapper;
     private final EventMapper eventMapper;
 
-    private final CategoryService categoryService;
     private final StatsClient statsClient;
 
-    @Override
-    public EventFullDto saveEvent(Long userId, NewEventDto newEventDto) {
-        User user = userRepository.findById(userId).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        String.format("%s with id = %d does not exist in database", "User", userId)));
+    private static final Long INITIAL_VIEWS = 0L;
+    private static final Integer INITIAL_CONFIRMED_REQUEST = 0;
 
-        Long categoryId = newEventDto.getCategory(); //todo тут может быть проблем из-за несоответствия классов. Хотя обёртка
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        String.format("%s with id = %d does not exist in database", "Category", categoryId)));
+    @Override
+    public EventFullDto saveEvent(Long userId, NewEventDto newEventDto) { //todo ready
+        User user = checkAndGetUser(userId);
+
+        Long categoryId = newEventDto.getCategory();
+        Category category = checkAndGetCategory(categoryId);
 
         Location location = locationMapper.dtoToModel(newEventDto.getLocation());
-        location = checkAndSetLocation(location);
+        location = checkAndGetLocation(location);
 
         Event event = eventMapper.toEvent(newEventDto);
+        event.setCreatedOn(LocalDateTime.now());
+        event.setState(PublicStatus.PENDING);
         event.setInitiator(user);
         event.setCategory(category);
         event.setLocation(location);
-        event.setCreatedOn(LocalDateTime.now());
-        event.setState(PublicStatus.PENDING);
-        event.setConfirmedRequests(0);
-        event.setViews(0L);
+        event.setConfirmedRequests(INITIAL_CONFIRMED_REQUEST);
+        event.setViews(INITIAL_VIEWS);
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
-    public EventFullDto getEventFullByOwner(Long userId, Long eventId) {
-        return eventMapper.toEventFullDto(eventRepository.findByIdAndInitiatorId(eventId, userId));
+    public EventFullDto getEventFullByOwner(Long userId, Long eventId) { //todo ready
+        checkAndGetUser(userId);
+        Event event = checkAndGetEvent(eventId);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    public List<EventShortDto> getEventsShortByOwner(Long userId, Integer from, Integer size) {
-        int pageNumber = (int) Math.ceil((double) from / size);
-        Pageable pageable = PageRequest.of(pageNumber, size);
-        return eventRepository.findAllByInitiatorId(userId, pageable).map(eventMapper::toEventShortDto).getContent();
+    public List<EventShortDto> getEventsShortByOwner(Long userId, Pageable pageable) { //todo ready
+        checkAndGetUser(userId);
+        return eventRepository.findAllByInitiatorId(userId, pageable)
+                .map(eventMapper::toEventShortDto)
+                .getContent();
     }
 
     @Override
-    public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId);
-        if (event.getState() == PublicStatus.PUBLISHED) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Can't change, because it already Published.");
+    public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) { //todo ready
+        checkAndGetUser(userId);
+        Event eventForUpdate = checkAndGetEvent(eventId);
+        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUserRequest);
+        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+
+        if (eventForUpdate.getState() == PublicStatus.PUBLISHED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Event already has Published state.");
         }
         if (eventUserRequest.getCategory() != null) {
-            event.setCategory(categoryMapper.dtoToModel(categoryService.findById(eventUserRequest.getCategory())));
-        }
-        if (eventUserRequest.getAnnotation() != null) {
-            event.setAnnotation(eventUserRequest.getAnnotation());
-        }
-        if (eventUserRequest.getDescription() != null) {
-            event.setDescription(eventUserRequest.getDescription());
-        }
-        if (eventUserRequest.getEventDate() != null) {
-            event.setEventDate(eventUserRequest.getEventDate());
+            eventForUpdate.setCategory(checkAndGetCategory(eventUserRequest.getCategory()));
         }
         if (eventUserRequest.getLocation() != null) {
             Location location = locationMapper.dtoToModel(eventUserRequest.getLocation());
-            location = checkAndSetLocation(location);
-            event.setLocation(location);
-        }
-        if (eventUserRequest.getPaid() != null) {
-            event.setPaid(eventUserRequest.getPaid());
-        }
-        if (eventUserRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(eventUserRequest.getParticipantLimit());
-        }
-        if (eventUserRequest.getRequestModeration() != null) {
-            event.setRequestModeration(eventUserRequest.getRequestModeration());
-        }
-        if (eventUserRequest.getTitle() != null) {
-            event.setTitle(eventUserRequest.getTitle());
+            location = checkAndGetLocation(location);
+            eventForUpdate.setLocation(location);
         }
         if (eventUserRequest.getStateAction() != null) {
             PrivateStatus statePrivate = PrivateStatus.valueOf(eventUserRequest.getStateAction());
             if (statePrivate.equals(PrivateStatus.SEND_TO_REVIEW)) {
-                event.setState(PublicStatus.PENDING);
+                eventForUpdate.setState(PublicStatus.PENDING);
             } else if (statePrivate.equals(PrivateStatus.CANCEL_REVIEW)) {
-                event.setState(PublicStatus.CANCELED);
+                eventForUpdate.setState(PublicStatus.CANCELED);
             }
         }
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        return eventMapper.toEventFullDto(eventRepository.save(eventForUpdate));
     }
 
     @Override
-    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventUpdReqAdm) {
-        Event eventForUpdate = eventRepository.findById(eventId).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        String.format("%s with id = %d does not exist in database", "Event", eventId)));
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventUpdReqAdm) { //todo ready
+        Event eventForUpdate = checkAndGetEvent(eventId);
 
         if (eventUpdReqAdm.getStateAction() != null) {
             AdminStatus adminStatus = AdminStatus.valueOf(eventUpdReqAdm.getStateAction());
@@ -145,34 +125,17 @@ public class EventServiceImpl implements EventService {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Status conflict. Event is not Pending");
             }
         }
+
+        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUpdReqAdm);
+        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+
         if (eventUpdReqAdm.getCategory() != null) {
-            eventForUpdate.setCategory(categoryMapper.dtoToModel(categoryService.findById(eventUpdReqAdm.getCategory())));
-        }
-        if (eventUpdReqAdm.getAnnotation() != null) {
-            eventForUpdate.setAnnotation(eventUpdReqAdm.getAnnotation());
-        }
-        if (eventUpdReqAdm.getDescription() != null) {
-            eventForUpdate.setDescription(eventUpdReqAdm.getDescription());
-        }
-        if (eventUpdReqAdm.getEventDate() != null) {
-            eventForUpdate.setEventDate(eventUpdReqAdm.getEventDate());
+            eventForUpdate.setCategory(checkAndGetCategory(eventUpdReqAdm.getCategory()));
         }
         if (eventUpdReqAdm.getLocation() != null) {
             Location location = locationMapper.dtoToModel(eventUpdReqAdm.getLocation());
-            location = checkAndSetLocation(location);
+            location = checkAndGetLocation(location);
             eventForUpdate.setLocation(location);
-        }
-        if (eventUpdReqAdm.getPaid() != null) {
-            eventForUpdate.setPaid(eventUpdReqAdm.getPaid());
-        }
-        if (eventUpdReqAdm.getParticipantLimit() != null) {
-            eventForUpdate.setParticipantLimit(eventUpdReqAdm.getParticipantLimit());
-        }
-        if (eventUpdReqAdm.getRequestModeration() != null) {
-            eventForUpdate.setRequestModeration(eventUpdReqAdm.getRequestModeration());
-        }
-        if (eventUpdReqAdm.getTitle() != null) {
-            eventForUpdate.setTitle(eventUpdReqAdm.getTitle());
         }
         if (eventUpdReqAdm.getStateAction() != null) {
             AdminStatus statePrivate = AdminStatus.valueOf(eventUpdReqAdm.getStateAction());
@@ -275,13 +238,37 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(Long eventId, HttpServletRequest request) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found."));
+        Event event = checkAndGetEvent(eventId);
         if (event.getState() != PublicStatus.PUBLISHED) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found.");
         }
         setViewsOfEvents(List.of(event));
         event.setViews(event.getViews() + 1);
         return eventMapper.toEventFullDto(event);
+    }
+
+    private Event checkAndGetEvent(Long eventId) {
+        return eventRepository.findById(eventId).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("%s with id = %d does not exist in database", "Event", eventId)));
+    }
+
+    private Location checkAndGetLocation(Location locationToCheck) {
+        if (locationRepository.existsByLatAndLon(locationToCheck.getLat(), locationToCheck.getLon())) {
+            return locationToCheck;
+        } else {
+            return locationRepository.save(locationToCheck);
+        }
+    }
+
+    private User checkAndGetUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("%s with id = %d does not exist in database", "User", userId)));
+    }
+
+    private Category checkAndGetCategory(Long categoryId) {
+        return categoryRepository.findById(categoryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("%s with id = %d does not exist in database", "Category", categoryId)));
     }
 
     private void setViewsOfEvents(List<Event> events) {
@@ -304,13 +291,5 @@ public class EventServiceImpl implements EventService {
             event.setViews(views);
         }
         eventRepository.saveAll(events);
-    }
-
-    private Location checkAndSetLocation(Location locationToCheck) {
-        if (locationRepository.existsByLatAndLon(locationToCheck.getLat(), locationToCheck.getLon())) {
-            return locationToCheck;
-        } else {
-            return locationRepository.save(locationToCheck);
-        }
     }
 }

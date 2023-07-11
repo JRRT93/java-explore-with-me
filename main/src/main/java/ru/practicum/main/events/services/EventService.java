@@ -1,5 +1,6 @@
 package ru.practicum.main.events.services;
 
+import org.springframework.data.domain.Pageable;
 import ru.practicum.main.events.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,9 +12,9 @@ public interface EventService {
 
     EventFullDto getEventFullByOwner(Long userId, Long eventId);
 
-    List<EventShortDto> getEventsShortByOwner(Long userId, Integer from, Integer size);
+    List<EventShortDto> getEventsShortByOwner(Long userId, Pageable pageable);
 
-    EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest);
+    EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
 
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventAdminRequest);
 

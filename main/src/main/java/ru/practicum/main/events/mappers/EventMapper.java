@@ -3,9 +3,7 @@ package ru.practicum.main.events.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.main.categories.mappers.CategoryMapper;
-import ru.practicum.main.events.dto.EventFullDto;
-import ru.practicum.main.events.dto.EventShortDto;
-import ru.practicum.main.events.dto.NewEventDto;
+import ru.practicum.main.events.dto.*;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.locations.mappers.LocationMapper;
 import ru.practicum.main.users.mappers.UserShortMapper;
@@ -63,6 +61,30 @@ public class EventMapper {
                 .category(categoryMapper.modelToDto(event.getCategory()))
                 .initiator(userShortMapper.modelToDto(event.getInitiator()))
                 .location(locationMapper.modelToDto(event.getLocation()))
+                .build();
+    }
+
+    public EventSimpleFieldsForUpdate toSimpleEvent(UpdateEventUserRequest dto) {
+        return EventSimpleFieldsForUpdate.builder()
+                .requestModeration(dto.getRequestModeration())
+                .participantLimit(dto.getParticipantLimit())
+                .annotation(dto.getAnnotation())
+                .description(dto.getDescription())
+                .eventDate(dto.getEventDate())
+                .title(dto.getTitle())
+                .paid(dto.getPaid())
+                .build();
+    }
+
+    public EventSimpleFieldsForUpdate toSimpleEvent(UpdateEventAdminRequest dto) {
+        return EventSimpleFieldsForUpdate.builder()
+                .requestModeration(dto.getRequestModeration())
+                .participantLimit(dto.getParticipantLimit())
+                .annotation(dto.getAnnotation())
+                .description(dto.getDescription())
+                .eventDate(dto.getEventDate())
+                .title(dto.getTitle())
+                .paid(dto.getPaid())
                 .build();
     }
 }
