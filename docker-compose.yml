@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.8'
 services:
   stats-server:
     build: stats/stats-server
@@ -12,7 +12,7 @@ services:
       - SERVER_PORT=9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
       - SPRING_DATASOURCE_USER=GymBoss
-      - SPRING_DATASOURCE_PASSWORD=nextDoor
+      - SPRING_DATASOURCE_PASSWORD=nextdoor
 
 
   stats-db:
@@ -23,4 +23,28 @@ services:
     environment:
       - POSTGRES_DB=stats
       - POSTGRES_USER=GymBoss
-      - POSTGRES_PASSWORD=nextDoor
+      - POSTGRES_PASSWORD=nextdoor
+
+  ewm-service:
+    build: main
+    image: main-image
+    container_name: main-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/main
+      - SPRING_DATASOURCE_USER=GymBoss
+      - SPRING_DATASOURCE_PASSWORD=nextdoor
+      - stats-service.url=http://stats-server:9090
+
+  ewm-db:
+    image: postgres:14-alpine
+    container_name: main-db-container
+    ports:
+      - "6542:5432"
+    environment:
+      - POSTGRES_DB=main
+      - POSTGRES_USER=GymBoss
+      - POSTGRES_PASSWORD=nextdoor
