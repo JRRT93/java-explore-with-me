@@ -1,5 +1,25 @@
 version: '3.8'
 services:
+  stats-db:
+    image: postgres:14-alpine
+    container_name: stats-db-container
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=GymBoss
+      - POSTGRES_PASSWORD=nextdoor
+
+  ewm-db:
+    image: postgres:14-alpine
+    container_name: main-db-container
+    ports:
+      - "6542:5432"
+    environment:
+      - POSTGRES_DB=main
+      - POSTGRES_USER=GymBoss
+      - POSTGRES_PASSWORD=nextdoor
+
   stats-server:
     build: stats/stats-server
     image: stats-server-image
@@ -14,17 +34,6 @@ services:
       - SPRING_DATASOURCE_USER=GymBoss
       - SPRING_DATASOURCE_PASSWORD=nextdoor
 
-
-  stats-db:
-    image: postgres:14-alpine
-    container_name: stats-db-container
-    ports:
-      - "6541:5432"
-    environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=GymBoss
-      - POSTGRES_PASSWORD=nextdoor
-
   ewm-service:
     build: main
     image: main-image
@@ -38,13 +47,3 @@ services:
       - SPRING_DATASOURCE_USER=GymBoss
       - SPRING_DATASOURCE_PASSWORD=nextdoor
       - stats-service.url=http://stats-server:9090
-
-  ewm-db:
-    image: postgres:14-alpine
-    container_name: main-db-container
-    ports:
-      - "6542:5432"
-    environment:
-      - POSTGRES_DB=main
-      - POSTGRES_USER=GymBoss
-      - POSTGRES_PASSWORD=nextdoor
