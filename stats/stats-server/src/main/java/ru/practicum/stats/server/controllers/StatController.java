@@ -3,6 +3,7 @@ package ru.practicum.stats.server.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.StatRecordIn;
 import ru.practicum.stats.dto.StatRecordOut;
@@ -29,6 +30,7 @@ public class StatController {
     }
 
     @PostMapping("/hit")
+    @ResponseStatus(value = HttpStatus.CREATED)
     public void saveStatRecord(@RequestBody StatRecordIn statRecordIn) {
         log.info("/hit REQUEST received. StatRecordIn={}", statRecordIn);
         service.saveStatRecord(statRecordIn);

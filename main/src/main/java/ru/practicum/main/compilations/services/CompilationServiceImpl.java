@@ -108,8 +108,8 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private Compilation checkAndSetCompilation(Long compilationId) {
-        return compilationRepository.findById(compilationId).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        return compilationRepository.findById(compilationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("%s with id = %d does not exist in database", "Compilation", compilationId)));
     }
 

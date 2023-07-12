@@ -47,8 +47,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto update(Long categoryId, CategoryDto categoryDto) {
-        Category category = repository.findById(categoryId).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found."));
+        Category category = repository.findById(categoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found."));
         if (repository.existsByName(categoryDto.getName()) && !categoryDto.getName().equals(category.getName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Name is already used.");
         }

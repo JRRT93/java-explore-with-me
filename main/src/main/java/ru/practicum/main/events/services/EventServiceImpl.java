@@ -242,8 +242,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event checkAndGetEvent(Long eventId) {
-        return eventRepository.findById(eventId).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("%s with id = %d does not exist in database", "Event", eventId)));
     }
 
