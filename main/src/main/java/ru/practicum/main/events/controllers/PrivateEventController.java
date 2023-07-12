@@ -2,10 +2,9 @@ package ru.practicum.main.events.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.main.utils.GetPageableUtil;
 import ru.practicum.main.events.dto.EventFullDto;
 import ru.practicum.main.events.dto.EventShortDto;
 import ru.practicum.main.events.dto.NewEventDto;
@@ -28,7 +27,6 @@ import java.util.List;
 @Slf4j
 public class PrivateEventController {
     private final EventService eventService;
-
     private final RequestService requestService;
 
     @PostMapping
@@ -41,7 +39,7 @@ public class PrivateEventController {
     @GetMapping("/{eventId}")
     public EventFullDto getEventFullByOwner(@PathVariable Long userId, @PathVariable Long eventId) { //todo ready
         log.info("GET request for private /users/{}/events/{} received.", userId, eventId);
-        return eventService.getEventFullByOwner(userId, eventId);
+        return eventService.findEventFullByOwner(userId, eventId);
     }
 
     @GetMapping
@@ -49,13 +47,7 @@ public class PrivateEventController {
                                              @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
                                              @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
         log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size); //todo ready
-        Pageable pageable;
-        if (size != null && from != null) {
-            pageable = PageRequest.of(from / size, size);
-        } else {
-            pageable = Pageable.unpaged();
-        }
-        return eventService.getEventsShortByOwner(userId, pageable);
+        return eventService.findEventsShortByOwner(userId, GetPageableUtil.getPageable(from, size));
     }
 
     @PatchMapping("/{eventId}")
@@ -71,7 +63,7 @@ public class PrivateEventController {
                                                                  @PathVariable Long eventId) {
         log.info("Получаем запрос на список заявок: userId={}, eventId={}", userId, eventId);
         List<ParticipationRequestDto> requestDtoList = requestService.getRequestsByOwnerEvent(userId, eventId);
-        log.info("Возвращаем {} элемент(а/ов)", requestDtoList.size());
+        log.info("Возвращаем {} элемент(а/ов)", requestDtoList.size()); //todo not ready
         return requestDtoList;
     }
 
@@ -81,7 +73,7 @@ public class PrivateEventController {
                                                                @RequestBody EventRequestStatusUpdateRequest request) {
         log.info("Получаем запрос на изменение статуса события: userId={}, eventId={}, request={}", userId, eventId, request);
         EventRequestStatusUpdateResult updateResult = requestService.updateStatusRequests(userId, eventId, request);
-        log.info("Возвращаем измененную заявку: {}", updateResult);
+        log.info("Возвращаем измененную заявку: {}", updateResult); //todo not ready
         return updateResult;
     }
 }

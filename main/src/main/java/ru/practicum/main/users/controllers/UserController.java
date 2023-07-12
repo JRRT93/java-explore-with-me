@@ -2,12 +2,11 @@ package ru.practicum.main.users.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.users.dto.UserDto;
 import ru.practicum.main.users.services.UserService;
+import ru.practicum.main.utils.GetPageableUtil;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -40,12 +39,6 @@ public class UserController {
                                   @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
                                   @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
         log.info("GET request for public /admin/users received. from={}, size={}", from, size);
-        Pageable pageable;
-        if (size != null && from != null) {
-            pageable = PageRequest.of(from / size, size);
-        } else {
-            pageable = Pageable.unpaged();
-        }
-        return service.findUsers(ids, pageable);
+        return service.findUsers(ids, GetPageableUtil.getPageable(from, size));
     }
 }

@@ -1,7 +1,6 @@
 package ru.practicum.main.events.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ import ru.practicum.main.users.repositories.UserJpaRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.StatRecordOut;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -69,14 +67,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventFullByOwner(Long userId, Long eventId) { //todo ready
+    public EventFullDto findEventFullByOwner(Long userId, Long eventId) { //todo ready
         checkAndGetUser(userId);
         Event event = checkAndGetEvent(eventId);
         return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    public List<EventShortDto> getEventsShortByOwner(Long userId, Pageable pageable) { //todo ready
+    public List<EventShortDto> findEventsShortByOwner(Long userId, Pageable pageable) { //todo ready
         checkAndGetUser(userId);
         return eventRepository.findAllByInitiatorId(userId, pageable)
                 .map(eventMapper::toEventShortDto)
@@ -149,18 +147,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid,
-                                         LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                         Boolean onlyAvailable, String sort, Integer from,
-                                         Integer size, HttpServletRequest request) {
-
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong timestamps of START or END.");
-        }
-        int pageNumber = (int) Math.ceil((double) from / size);
-        Pageable pageable = PageRequest.of(pageNumber, size);
+    public List<EventShortDto> findEvents(String text, List<Long> categories, Boolean paid,
+                                          LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                          Boolean onlyAvailable, String sort, Pageable pageable) { //todo ready
+        checkRanges(rangeStart, rangeEnd);
 
         Specification<Event> specification = Specification.where(null);
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startDateTime = Objects.requireNonNullElseGet(rangeStart, () -> now);
+        specification = specification.and((root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
 
         if (text != null) {
             specification = specification.and((root, query, criteriaBuilder) ->
@@ -170,31 +167,26 @@ public class EventServiceImpl implements EventService {
                     ));
         }
 
+        if (onlyAvailable != null && onlyAvailable) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("participantLimit"), 0));
+        }
+
         if (categories != null && !categories.isEmpty()) {
             specification = specification.and((root, query, criteriaBuilder) ->
                     root.get("category").get("id").in(categories));
         }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDateTime = Objects.requireNonNullElseGet(rangeStart, () -> now);
-        specification = specification.and((root, query, criteriaBuilder) ->
-                criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
 
         if (rangeEnd != null) {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThan(root.get("eventDate"), rangeEnd));
         }
 
-        if (onlyAvailable != null && onlyAvailable) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("participantLimit"), 0));
-        }
-
         specification = specification.and((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("state"), PublicStatus.PUBLISHED));
 
         List<Event> resultEvents = eventRepository.findAll(specification, pageable).getContent();
-        setViewsOfEvents(resultEvents);
+        setStatistic(resultEvents);
 
         return resultEvents.stream()
                 .map(eventMapper::toEventShortDto)
@@ -202,47 +194,49 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> searchEvents(List<Long> users, List<String> states, List<Long> categories,
-                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong timestamps of START or END.");
-        }
-        int pageNumber = (int) Math.ceil((double) from / size);
-        Pageable pageable = PageRequest.of(pageNumber, size);
+    public List<EventFullDto> findFullEvents(List<Long> users, List<String> states, List<Long> categories,
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable) {
+        checkRanges(rangeStart, rangeEnd); //todo ready
 
         Specification<Event> specification = Specification.where(null);
 
-        if (users != null && !users.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) -> root.get("initiator").get("id").in(users));
-        }
-
-        if (states != null && !states.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) -> root.get("state").as(String.class).in(states));
-        }
-
-        if (categories != null && !categories.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) -> root.get("category").get("id").in(categories));
-        }
-
         if (rangeStart != null) {
-            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
         }
 
         if (rangeEnd != null) {
-            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
         }
 
-        return eventRepository.findAll(specification, pageable).map(eventMapper::toEventFullDto).getContent();
+        if (users != null && !users.isEmpty()) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    root.get("initiator").get("id").in(users));
+        }
+
+        if (states != null && !states.isEmpty()) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    root.get("state").as(String.class).in(states));
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    root.get("category").get("id").in(categories));
+        }
+
+        return eventRepository.findAll(specification, pageable)
+                .map(eventMapper::toEventFullDto)
+                .getContent();
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId, HttpServletRequest request) {
+    public EventFullDto findEventById(Long eventId) { //todo ready
         Event event = checkAndGetEvent(eventId);
         if (event.getState() != PublicStatus.PUBLISHED) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Status conflict. Event not Published");
         }
-        setViewsOfEvents(List.of(event));
+        setStatistic(List.of(event));
         event.setViews(event.getViews() + 1);
         return eventMapper.toEventFullDto(event);
     }
@@ -263,7 +257,7 @@ public class EventServiceImpl implements EventService {
 
     private User checkAndGetUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        String.format("%s with id = %d does not exist in database", "User", userId)));
+                String.format("%s with id = %d does not exist in database", "User", userId)));
     }
 
     private Category checkAndGetCategory(Long categoryId) {
@@ -271,15 +265,22 @@ public class EventServiceImpl implements EventService {
                 String.format("%s with id = %d does not exist in database", "Category", categoryId)));
     }
 
-    private void setViewsOfEvents(List<Event> events) {
+    private void checkRanges(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "START should be after END.");
+        }
+    }
+
+    private void setStatistic(List<Event> events) {
         List<String> uris = events.stream()
                 .map(event -> String.format("/events/%s", event.getId()))
                 .collect(Collectors.toList());
 
-        List<StatRecordOut> viewStatsList = statsClient.getStats("2000-01-01 00:00:00", "2100-01-01 00:00:00", uris, false);
+        List<StatRecordOut> statsList = statsClient.getStats("2000-01-01 00:00:00", "3000-01-01 00:00:00",
+                uris, false); //todo не упадут ли тесты изза 3000
 
         for (Event event : events) {
-            StatRecordOut currentViewStats = viewStatsList.stream()
+            StatRecordOut currentStat = statsList.stream()
                     .filter(statsDto -> {
                         Long eventIdOfViewStats = Long.parseLong(statsDto.getUri().substring("/events/".length()));
                         return eventIdOfViewStats.equals(event.getId());
@@ -287,7 +288,13 @@ public class EventServiceImpl implements EventService {
                     .findFirst()
                     .orElse(null);
 
-            Long views = (currentViewStats != null) ? currentViewStats.getHits() : 0;
+            Long views;
+            if (currentStat != null) {
+                views = currentStat.getHits();
+            } else {
+                views = 0L;
+            }
+
             event.setViews(views);
         }
         eventRepository.saveAll(events);
