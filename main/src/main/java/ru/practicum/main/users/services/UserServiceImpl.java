@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserJpaRepository repository;
     private final UserMapper userMapper;
 
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService{
     public UserDto saveUser(UserDto userDto) {
         try {
             return userMapper.modelToDto(repository.save(userMapper.dtoToModel(userDto)));
-        } catch (ConstraintViolationException exception){
+        } catch (ConstraintViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("%s not saved due Constraint violations", "User"));
         }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class ConflictHandler {
     private static final String REASON = "REQUEST HAS DATA CONFLICT";
+
     @ExceptionHandler
     public ApiError handleNotFoundException(final DataIntegrityViolationException e) {
         String message = e.getMessage();

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.main.utils.GetPageableUtil;
 import ru.practicum.main.events.dto.EventFullDto;
 import ru.practicum.main.events.dto.EventShortDto;
 import ru.practicum.main.events.dto.NewEventDto;
@@ -14,6 +13,7 @@ import ru.practicum.main.requests.dto.ParticipationRequestDto;
 import ru.practicum.main.requests.model.EventRequestStatusUpdateRequest;
 import ru.practicum.main.requests.model.EventRequestStatusUpdateResult;
 import ru.practicum.main.requests.services.RequestService;
+import ru.practicum.main.utils.GetPageableUtil;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

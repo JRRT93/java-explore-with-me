@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto save(CategoryDto categoryDto) {
         try {
             return categoryMapper.modelToDto(repository.save(categoryMapper.dtoToModel(categoryDto)));
-        } catch (ConstraintViolationException exception){
+        } catch (ConstraintViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("%s not saved due Constraint violations", "Category"));
         }

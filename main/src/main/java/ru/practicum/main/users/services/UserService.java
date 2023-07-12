@@ -9,5 +9,6 @@ public interface UserService {
     UserDto saveUser(UserDto userDto);
 
     void deleteById(Long userId);
+
     List<UserDto> findUsers(List<Long> userIds, Pageable pageable);
 }
