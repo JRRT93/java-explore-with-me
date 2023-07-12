@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private static final Integer INITIAL_CONFIRMED_REQUEST = 0;
 
     @Override
-    public EventFullDto saveEvent(Long userId, NewEventDto newEventDto) { //todo ready
+    public EventFullDto saveEvent(Long userId, NewEventDto newEventDto) {
         User user = checkAndGetUser(userId);
 
         Long categoryId = newEventDto.getCategory();
@@ -67,14 +67,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto findEventFullByOwner(Long userId, Long eventId) { //todo ready
+    public EventFullDto findEventFullByOwner(Long userId, Long eventId) {
         checkAndGetUser(userId);
         Event event = checkAndGetEvent(eventId);
         return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    public List<EventShortDto> findEventsShortByOwner(Long userId, Pageable pageable) { //todo ready
+    public List<EventShortDto> findEventsShortByOwner(Long userId, Pageable pageable) {
         checkAndGetUser(userId);
         return eventRepository.findAllByInitiatorId(userId, pageable)
                 .map(eventMapper::toEventShortDto)
@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) { //todo ready
+    public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
         checkAndGetUser(userId);
         Event eventForUpdate = checkAndGetEvent(eventId);
         EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUserRequest);
@@ -111,7 +111,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventUpdReqAdm) { //todo ready
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventUpdReqAdm) {
         Event eventForUpdate = checkAndGetEvent(eventId);
 
         if (eventUpdReqAdm.getStateAction() != null) {
@@ -149,7 +149,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> findEvents(String text, List<Long> categories, Boolean paid,
                                           LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                          Boolean onlyAvailable, String sort, Pageable pageable) { //todo ready
+                                          Boolean onlyAvailable, String sort, Pageable pageable) {
         checkRanges(rangeStart, rangeEnd);
 
         Specification<Event> specification = Specification.where(null);
@@ -196,7 +196,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> findFullEvents(List<Long> users, List<String> states, List<Long> categories,
                                              LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable) {
-        checkRanges(rangeStart, rangeEnd); //todo ready
+        checkRanges(rangeStart, rangeEnd);
 
         Specification<Event> specification = Specification.where(null);
 
@@ -231,7 +231,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto findEventById(Long eventId) { //todo ready
+    public EventFullDto findEventById(Long eventId) {
         Event event = checkAndGetEvent(eventId);
         if (event.getState() != PublicStatus.PUBLISHED) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Status conflict. Event not Published");
@@ -277,7 +277,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         List<StatRecordOut> statsList = statsClient.getStats("2000-01-01 00:00:00", "3000-01-01 00:00:00",
-                uris, false); //todo не упадут ли тесты изза 3000
+                uris, false);
 
         for (Event event : events) {
             StatRecordOut currentStat = statsList.stream()

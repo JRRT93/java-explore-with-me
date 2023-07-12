@@ -31,13 +31,13 @@ public class PrivateEventController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public EventFullDto saveEvent(@PathVariable Long userId, @RequestBody @Valid NewEventDto newEventDto) { //todo ready
+    public EventFullDto saveEvent(@PathVariable Long userId, @RequestBody @Valid NewEventDto newEventDto) {
         log.info("POST request for /users/{}/events received. Provided DTO: {}", userId, newEventDto);
         return eventService.saveEvent(userId, newEventDto);
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEventFullByOwner(@PathVariable Long userId, @PathVariable Long eventId) { //todo ready
+    public EventFullDto getEventFullByOwner(@PathVariable Long userId, @PathVariable Long eventId) {
         log.info("GET request for private /users/{}/events/{} received.", userId, eventId);
         return eventService.findEventFullByOwner(userId, eventId);
     }
@@ -46,7 +46,7 @@ public class PrivateEventController {
     List<EventShortDto> getEventShortByOwner(@PathVariable Long userId,
                                              @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
                                              @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
-        log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size); //todo ready
+        log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size);
         return eventService.findEventsShortByOwner(userId, GetPageableUtil.getPageable(from, size));
     }
 
@@ -55,25 +55,20 @@ public class PrivateEventController {
                                            @RequestBody @Valid UpdateEventUserRequest updateEventUserRequest) {
         log.info("PATCH request for private /users/{}/events/{} received. Provided DTO: {}",
                 userId, eventId, updateEventUserRequest);
-        return eventService.updateEventByOwner(userId, eventId, updateEventUserRequest); //todo ready
-    }
-
-    @GetMapping("/{eventId}/requests")
-    public List<ParticipationRequestDto> getRequestsByOwnerEvent(@PathVariable Long userId,
-                                                                 @PathVariable Long eventId) {
-        log.info("Получаем запрос на список заявок: userId={}, eventId={}", userId, eventId);
-        List<ParticipationRequestDto> requestDtoList = requestService.getRequestsByOwnerEvent(userId, eventId);
-        log.info("Возвращаем {} элемент(а/ов)", requestDtoList.size()); //todo not ready
-        return requestDtoList;
+        return eventService.updateEventByOwner(userId, eventId, updateEventUserRequest);
     }
 
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult updateStatusRequests(@PathVariable Long userId,
                                                                @PathVariable Long eventId,
                                                                @RequestBody EventRequestStatusUpdateRequest request) {
-        log.info("Получаем запрос на изменение статуса события: userId={}, eventId={}, request={}", userId, eventId, request);
-        EventRequestStatusUpdateResult updateResult = requestService.updateStatusRequests(userId, eventId, request);
-        log.info("Возвращаем измененную заявку: {}", updateResult); //todo not ready
-        return updateResult;
+        log.info("PATCH request for private /users/{}/events/{}/request", userId, eventId);
+        return requestService.updateStatusRequest(userId, eventId, request);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public List<ParticipationRequestDto> getRequestsByOwnerEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        log.info("GET request for private /users/{}/events/{}/requests", userId, eventId);
+        return requestService.findRequestsByOwnerEvent(userId, eventId);
     }
 }

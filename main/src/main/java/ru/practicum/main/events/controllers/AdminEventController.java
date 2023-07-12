@@ -27,7 +27,7 @@ public class AdminEventController {
     public EventFullDto updateEventByAdmin(@PathVariable Long eventId,
                                            @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         log.info("POST request for /admin/events/{} received. Provided DTO: {}", eventId, updateEventAdminRequest);
-        return service.updateEventByAdmin(eventId, updateEventAdminRequest); //todo ready
+        return service.updateEventByAdmin(eventId, updateEventAdminRequest);
     }
 
     @GetMapping
@@ -40,6 +40,6 @@ public class AdminEventController {
                                            @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
         log.info("GET request for /admin/events received.");
         return service.findFullEvents(users, states, categories, rangeStart, rangeEnd,
-                GetPageableUtil.getPageable(from, size)); //todo ready
+                GetPageableUtil.getPageable(from, size));
     }
 }

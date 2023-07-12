@@ -42,7 +42,7 @@ public class PublicEventController {
         log.info("Information about request send to Stats-server");
 
         return eventService.findEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort,
-                GetPageableUtil.getPageable(from, size)); //todo ready
+                GetPageableUtil.getPageable(from, size));
     }
 
     @GetMapping("/{eventId}")
@@ -53,6 +53,6 @@ public class PublicEventController {
         statsClient.saveStatRecord(request);
         log.info("Information about request send to Stats-server");
 
-        return eventService.findEventById(eventId); //todo ready
+        return eventService.findEventById(eventId);
     }
 }
