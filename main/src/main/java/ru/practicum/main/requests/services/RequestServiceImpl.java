@@ -28,6 +28,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestJpaRepository requestRepository;
     private final EventJpaRepository eventRepository;
     private final UserJpaRepository userRepository;
+    private final RequestMapper requestMapper;
 
     @Override
     public ParticipationRequestDto saveRequest(Long userId, Long eventId) {
@@ -59,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
             request.setStatus(RequestStatus.CONFIRMED);
             eventRepository.save(event);
         }
-        return RequestMapper.modelToDto(requestRepository.save(request));
+        return requestMapper.modelToDto(requestRepository.save(request));
     }
 
     @Override
@@ -67,7 +68,7 @@ public class RequestServiceImpl implements RequestService {
         checkAndGetUser(userId);
         checkAndGetEvent(eventId);
         return requestRepository.findAllByEventId(eventId).stream()
-                .map(RequestMapper::modelToDto)
+                .map(requestMapper::modelToDto)
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +76,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> findAllRequests(Long userId) {
         checkAndGetUser(userId);
         return requestRepository.findAllByRequesterId(userId).stream()
-                .map(RequestMapper::modelToDto)
+                .map(requestMapper::modelToDto)
                 .collect(Collectors.toList());
     }
 
@@ -84,7 +85,7 @@ public class RequestServiceImpl implements RequestService {
         checkAndGetUser(userId);
         ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId);
         request.setStatus(RequestStatus.CANCELED);
-        return RequestMapper.modelToDto(requestRepository.save(request));
+        return requestMapper.modelToDto(requestRepository.save(request));
     }
 
     @Override
@@ -110,16 +111,16 @@ public class RequestServiceImpl implements RequestService {
                     }
                     if (request.getStatus() == RequestStatus.REJECTED) {
                         req.setStatus(request.getStatus());
-                        rejected.add(RequestMapper.modelToDto(req));
+                        rejected.add(requestMapper.modelToDto(req));
                     }
                     if (event.getConfirmedRequests() < event.getParticipantLimit() &&
                             request.getStatus() == RequestStatus.CONFIRMED) {
                         req.setStatus(request.getStatus());
                         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-                        confirmed.add(RequestMapper.modelToDto(req));
+                        confirmed.add(requestMapper.modelToDto(req));
                     } else {
                         req.setStatus(RequestStatus.REJECTED);
-                        rejected.add(RequestMapper.modelToDto(req));
+                        rejected.add(requestMapper.modelToDto(req));
                     }
                 })
                 .collect(Collectors.toList());
