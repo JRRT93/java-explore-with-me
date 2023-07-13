@@ -44,8 +44,8 @@ public class PrivateEventController {
 
     @GetMapping
     public List<EventShortDto> getEventShortByOwner(@PathVariable Long userId,
-                                             @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
-                                             @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
+                                                    @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
+                                                    @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
         log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size);
         return eventService.findEventsShortByOwner(userId, GetPageableUtil.getPageable(from, size));
     }

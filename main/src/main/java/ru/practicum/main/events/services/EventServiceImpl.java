@@ -10,7 +10,6 @@ import ru.practicum.main.categories.model.Category;
 import ru.practicum.main.categories.repositories.CategoryJpaRepository;
 import ru.practicum.main.events.dto.*;
 import ru.practicum.main.events.enums.AdminStatus;
-import ru.practicum.main.events.enums.PrivateStatus;
 import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.mappers.EventMapper;
 import ru.practicum.main.events.model.Event;
@@ -55,7 +54,7 @@ public class EventServiceImpl implements EventService {
         Location location = locationMapper.dtoToModel(newEventDto.getLocation());
         location = checkAndGetLocation(location);
 
-        Event event = eventMapper.toEvent(newEventDto);
+        Event event = eventMapper.dtoToModel(newEventDto);
         event.setCreatedOn(LocalDateTime.now());
         event.setState(PublicStatus.PENDING);
         event.setInitiator(user);
@@ -88,6 +87,17 @@ public class EventServiceImpl implements EventService {
         EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUserRequest);
         EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
 
+        if (eventUserRequest.getStateAction() != null) {
+            switch (eventUserRequest.getStateAction()) {
+                case "SEND_TO_REVIEW":
+                    eventForUpdate.setState(PublicStatus.PENDING);
+                    break;
+                case "CANCEL_REVIEW":
+                    eventForUpdate.setState(PublicStatus.CANCELED);
+                    break;
+            }
+        }
+
         if (eventForUpdate.getState() == PublicStatus.PUBLISHED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Event already has Published state.");
         }
@@ -99,14 +109,7 @@ public class EventServiceImpl implements EventService {
             location = checkAndGetLocation(location);
             eventForUpdate.setLocation(location);
         }
-        if (eventUserRequest.getStateAction() != null) {
-            PrivateStatus statePrivate = PrivateStatus.valueOf(eventUserRequest.getStateAction());
-            if (statePrivate.equals(PrivateStatus.SEND_TO_REVIEW)) {
-                eventForUpdate.setState(PublicStatus.PENDING);
-            } else if (statePrivate.equals(PrivateStatus.CANCEL_REVIEW)) {
-                eventForUpdate.setState(PublicStatus.CANCELED);
-            }
-        }
+
         return eventMapper.toEventFullDto(eventRepository.save(eventForUpdate));
     }
 
@@ -127,6 +130,17 @@ public class EventServiceImpl implements EventService {
         EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUpdReqAdm);
         EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
 
+        if (eventUpdReqAdm.getStateAction() != null) {
+            switch (eventUpdReqAdm.getStateAction()) {
+                case "PUBLISH_EVENT":
+                    eventForUpdate.setState(PublicStatus.PUBLISHED);
+                    break;
+                case "REJECT_EVENT":
+                    eventForUpdate.setState(PublicStatus.CANCELED);
+                    break;
+            }
+        }
+
         if (eventUpdReqAdm.getCategory() != null) {
             eventForUpdate.setCategory(checkAndGetCategory(eventUpdReqAdm.getCategory()));
         }
@@ -135,14 +149,7 @@ public class EventServiceImpl implements EventService {
             location = checkAndGetLocation(location);
             eventForUpdate.setLocation(location);
         }
-        if (eventUpdReqAdm.getStateAction() != null) {
-            AdminStatus statePrivate = AdminStatus.valueOf(eventUpdReqAdm.getStateAction());
-            if (statePrivate.equals(AdminStatus.PUBLISH_EVENT)) {
-                eventForUpdate.setState(PublicStatus.PUBLISHED);
-            } else if (statePrivate.equals(AdminStatus.REJECT_EVENT)) {
-                eventForUpdate.setState(PublicStatus.CANCELED);
-            }
-        }
+
         return eventMapper.toEventFullDto(eventRepository.save(eventForUpdate));
     }
 
@@ -155,15 +162,17 @@ public class EventServiceImpl implements EventService {
         Specification<Event> specification = Specification.where(null);
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDateTime = Objects.requireNonNullElseGet(rangeStart, () -> now);
+        LocalDateTime startDateTime = Objects.requireNonNullElse(rangeStart, now);
         specification = specification.and((root, query, criteriaBuilder) ->
                 criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
 
         if (text != null) {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.or(
-                            criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), "%" + text.toLowerCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + text.toLowerCase() + "%")
+                            criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), "%" +
+                                    text.toLowerCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" +
+                                    text.toLowerCase() + "%")
                     ));
         }
 
