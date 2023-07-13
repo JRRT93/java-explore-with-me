@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class UpdateCompilationRequest {
     @Size(min = 1, max = 50)
-    String title;
-    Boolean pinned;
-    List<Long> events;
+    private String title;
+    private Boolean pinned;
+    private List<Long> events;
 }

@@ -43,7 +43,7 @@ public class PrivateEventController {
     }
 
     @GetMapping
-    List<EventShortDto> getEventShortByOwner(@PathVariable Long userId,
+    public List<EventShortDto> getEventShortByOwner(@PathVariable Long userId,
                                              @RequestParam(value = "from", defaultValue = "0") @PositiveOrZero Integer from,
                                              @RequestParam(value = "size", defaultValue = "10") @Positive Integer size) {
         log.info("GET request for private /users/{}/events received. from={}, size={}", userId, from, size);
