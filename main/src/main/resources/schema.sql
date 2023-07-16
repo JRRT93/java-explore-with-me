@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS participation_request;
 DROP TABLE IF EXISTS compilation_events;
 DROP TABLE IF EXISTS compilations;
+DROP TABLE IF EXISTS participant_confirmed_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS categories;
@@ -49,6 +50,13 @@ CREATE TABLE IF NOT EXISTS events(
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (initiator_id) REFERENCES users(id),
     FOREIGN KEY (locations_id) REFERENCES locations(id)
+);
+
+CREATE TABLE IF NOT EXISTS participant_confirmed_events(
+    participant_id BIGINT,
+    event_id BIGINT,
+    FOREIGN KEY (event_id) REFERENCES events(id),
+    FOREIGN KEY (participant_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS participation_request(

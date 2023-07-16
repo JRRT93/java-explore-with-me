@@ -59,6 +59,8 @@ public class RequestServiceImpl implements RequestService {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             request.setStatus(RequestStatus.CONFIRMED);
             eventRepository.save(event);
+            initiator.getConfirmedEvents().add(event);
+            userRepository.save(initiator);
         }
         return requestMapper.modelToDto(requestRepository.save(request));
     }
@@ -118,12 +120,16 @@ public class RequestServiceImpl implements RequestService {
                         req.setStatus(request.getStatus());
                         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                         confirmed.add(requestMapper.modelToDto(req));
+                        User participant = req.getRequester(); //todo возможно будет падать из-за этого места
+                        participant.getConfirmedEvents().add(event);
+                        userRepository.save(participant);
                     } else {
                         req.setStatus(RequestStatus.REJECTED);
                         rejected.add(requestMapper.modelToDto(req));
                     }
                 })
                 .collect(Collectors.toList());
+
         eventRepository.save(event);
         requestRepository.saveAll(requests);
         return new EventRequestStatusUpdateResult(confirmed, rejected);

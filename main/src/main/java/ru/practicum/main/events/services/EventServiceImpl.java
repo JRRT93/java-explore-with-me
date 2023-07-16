@@ -26,6 +26,7 @@ import ru.practicum.stats.dto.StatRecordOut;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -257,11 +258,9 @@ public class EventServiceImpl implements EventService {
     }
 
     private Location checkAndGetLocation(Location locationToCheck) {
-        if (locationRepository.existsByLatAndLon(locationToCheck.getLat(), locationToCheck.getLon())) {
-            return locationToCheck;
-        } else {
-            return locationRepository.save(locationToCheck);
-        }
+        Optional<Location> foundLocation = locationRepository.findByLatAndLon(locationToCheck.getLat(),
+                locationToCheck.getLon());
+        return foundLocation.orElseGet(() -> locationRepository.save(locationToCheck));
     }
 
     private User checkAndGetUser(Long userId) {
