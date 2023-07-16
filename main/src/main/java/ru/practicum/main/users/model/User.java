@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.main.events.model.Event;
+import ru.practicum.main.users.enums.EventVisionMode;
+import ru.practicum.main.users.enums.SubscribersMode;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -30,4 +32,34 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> confirmedEvents;
+    /*@ManyToMany
+    @JoinTable( //todo delete later
+            name = "users_subscriptions",
+            joinColumns = @JoinColumn(name = "subscriber_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> subscriptions;*/
+    @ManyToMany
+    @JoinTable(
+            name = "users_subscriptions",
+            joinColumns = @JoinColumn(name = "blogger_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> subscribers;
+    @ManyToMany
+    @JoinTable(
+            name = "users_event_vision_blacklist",
+            joinColumns = @JoinColumn(name = "blogger_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> eventVisionBlackList;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "created_event_vision_mode", length = 30)
+    private EventVisionMode createdEventVisionMode;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "participation_event_vision_mode", length = 30)
+    private EventVisionMode participationEventVisionMode;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscribers_mode", length = 30)
+    private SubscribersMode subscribersMode;
 }

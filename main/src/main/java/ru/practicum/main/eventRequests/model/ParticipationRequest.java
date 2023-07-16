@@ -1,8 +1,8 @@
-package ru.practicum.main.requests.model;
+package ru.practicum.main.eventRequests.model;
 
 import lombok.*;
 import ru.practicum.main.events.model.Event;
-import ru.practicum.main.requests.enums.RequestStatus;
+import ru.practicum.main.eventRequests.enums.RequestStatus;
 import ru.practicum.main.users.model.User;
 
 import javax.persistence.*;

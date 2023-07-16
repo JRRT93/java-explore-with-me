@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.main.users.dto.UserDto;
+import ru.practicum.main.users.enums.EventVisionMode;
+import ru.practicum.main.users.enums.SubscribersMode;
 import ru.practicum.main.users.mappers.UserMapper;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
@@ -23,7 +25,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(UserDto userDto) {
         try {
-            return userMapper.modelToDto(repository.save(userMapper.dtoToModel(userDto)));
+            User user = userMapper.dtoToModel(userDto);
+            user.setCreatedEventVisionMode(EventVisionMode.FOR_ALL_SUBSCRIBERS);
+            user.setParticipationEventVisionMode(EventVisionMode.FOR_ALL_SUBSCRIBERS);
+            user.setSubscribersMode(SubscribersMode.ALLOWED_FOR_ALL);
+            return userMapper.modelToDto(repository.save(user));
         } catch (ConstraintViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("%s not saved due Constraint violations", "User"));

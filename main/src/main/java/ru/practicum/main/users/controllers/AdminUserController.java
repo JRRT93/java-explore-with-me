@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/users")
 @Slf4j
-public class UserController {
+public class AdminUserController {
     private final UserService service;
 
     @PostMapping

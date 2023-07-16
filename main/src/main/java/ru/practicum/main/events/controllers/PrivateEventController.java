@@ -9,10 +9,10 @@ import ru.practicum.main.events.dto.EventShortDto;
 import ru.practicum.main.events.dto.NewEventDto;
 import ru.practicum.main.events.dto.UpdateEventUserRequest;
 import ru.practicum.main.events.services.EventService;
-import ru.practicum.main.requests.dto.ParticipationRequestDto;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateRequest;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateResult;
-import ru.practicum.main.requests.services.RequestService;
+import ru.practicum.main.eventRequests.dto.ParticipationRequestDto;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateRequest;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateResult;
+import ru.practicum.main.eventRequests.services.RequestService;
 import ru.practicum.main.utils.GetPageableUtil;
 
 import javax.validation.Valid;

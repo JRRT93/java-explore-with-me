@@ -1,9 +1,9 @@
-package ru.practicum.main.requests.mappers;
+package ru.practicum.main.eventRequests.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.main.requests.dto.ParticipationRequestDto;
-import ru.practicum.main.requests.model.ParticipationRequest;
+import ru.practicum.main.eventRequests.dto.ParticipationRequestDto;
+import ru.practicum.main.eventRequests.model.ParticipationRequest;
 
 @Mapper(componentModel = "spring")
 public interface RequestMapper {

@@ -1,4 +1,4 @@
-package ru.practicum.main.requests.services;
+package ru.practicum.main.eventRequests.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -7,13 +7,13 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.events.repositories.EventJpaRepository;
-import ru.practicum.main.requests.dto.ParticipationRequestDto;
-import ru.practicum.main.requests.enums.RequestStatus;
-import ru.practicum.main.requests.mappers.RequestMapper;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateRequest;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateResult;
-import ru.practicum.main.requests.model.ParticipationRequest;
-import ru.practicum.main.requests.repositories.RequestJpaRepository;
+import ru.practicum.main.eventRequests.dto.ParticipationRequestDto;
+import ru.practicum.main.eventRequests.enums.RequestStatus;
+import ru.practicum.main.eventRequests.mappers.RequestMapper;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateRequest;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateResult;
+import ru.practicum.main.eventRequests.model.ParticipationRequest;
+import ru.practicum.main.eventRequests.repositories.RequestJpaRepository;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 
