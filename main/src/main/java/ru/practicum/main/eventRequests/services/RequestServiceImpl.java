@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.main.events.enums.PublicStatus;
-import ru.practicum.main.events.model.Event;
-import ru.practicum.main.events.repositories.EventJpaRepository;
 import ru.practicum.main.eventRequests.dto.ParticipationRequestDto;
 import ru.practicum.main.eventRequests.enums.RequestStatus;
 import ru.practicum.main.eventRequests.mappers.RequestMapper;
@@ -14,6 +11,9 @@ import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateRequest;
 import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateResult;
 import ru.practicum.main.eventRequests.model.ParticipationRequest;
 import ru.practicum.main.eventRequests.repositories.RequestJpaRepository;
+import ru.practicum.main.events.enums.PublicStatus;
+import ru.practicum.main.events.model.Event;
+import ru.practicum.main.events.repositories.EventJpaRepository;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 
@@ -120,7 +120,7 @@ public class RequestServiceImpl implements RequestService {
                         req.setStatus(request.getStatus());
                         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                         confirmed.add(requestMapper.modelToDto(req));
-                        User participant = req.getRequester(); //todo возможно будет падать из-за этого места
+                        User participant = req.getRequester();
                         participant.getConfirmedEvents().add(event);
                         userRepository.save(participant);
                     } else {

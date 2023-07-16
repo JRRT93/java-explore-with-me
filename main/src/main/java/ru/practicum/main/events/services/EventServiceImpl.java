@@ -18,6 +18,7 @@ import ru.practicum.main.events.utils.EventUpdateUtil;
 import ru.practicum.main.locations.mappers.LocationMapper;
 import ru.practicum.main.locations.model.Location;
 import ru.practicum.main.locations.repositories.LocationJpaRepository;
+import ru.practicum.main.users.enums.EventVisionMode;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 import ru.practicum.stats.client.StatsClient;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -249,6 +251,63 @@ public class EventServiceImpl implements EventService {
         setStatistic(List.of(event));
         event.setViews(event.getViews() + 1);
         return eventMapper.toEventFullDto(event);
+    }
+
+    @Override
+    public List<EventShortDto> findBloggersCreatedEvents(Long subscriberId, Long bloggerId, Pageable pageable) {
+        User blogger = checkAndGetUser(bloggerId);
+        User subscriber = checkAndGetUser(subscriberId);
+        initialPrivacyCheck(blogger, subscriber);
+        Set<Event> eventList;
+
+        if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
+            if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
+                eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                        "unavailable due lack of mutual subscription");
+            }
+        } else {
+            eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
+        }
+        return eventList.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventShortDto> findBloggersParticipationEvents(Long subscriberId, Long bloggerId, Pageable pageable) {
+        User blogger = checkAndGetUser(bloggerId);
+        User subscriber = checkAndGetUser(subscriberId);
+        initialPrivacyCheck(blogger, subscriber);
+        Set<Event> eventList;
+
+        if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
+            if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
+                eventList = blogger.getConfirmedEvents();
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                        "unavailable due lack of mutual subscription");
+            }
+        } else {
+            eventList = blogger.getConfirmedEvents();
+        }
+        return eventList.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+    }
+
+    private void initialPrivacyCheck(User blogger, User subscriber) {
+        if (blogger.getSubscribers().stream().noneMatch(sub -> sub.getId().equals(subscriber.getId()))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due unsubscribe state");
+        }
+
+        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
+                blogger.getCreatedEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due BAN");
+        }
     }
 
     private Event checkAndGetEvent(Long eventId) {

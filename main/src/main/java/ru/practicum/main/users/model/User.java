@@ -32,13 +32,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> confirmedEvents;
-    /*@ManyToMany
-    @JoinTable( //todo delete later
-            name = "users_subscriptions",
-            joinColumns = @JoinColumn(name = "subscriber_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> subscriptions;*/
     @ManyToMany
     @JoinTable(
             name = "users_subscriptions",
@@ -46,6 +39,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> subscribers;
+    @ManyToMany(mappedBy = "subscribers")
+    private Set<User> bloggersSubscribed;
     @ManyToMany
     @JoinTable(
             name = "users_event_vision_blacklist",

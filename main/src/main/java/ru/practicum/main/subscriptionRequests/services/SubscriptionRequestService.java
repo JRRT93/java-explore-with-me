@@ -6,8 +6,11 @@ import java.util.List;
 
 public interface SubscriptionRequestService {
     SubscriptionRequestDto saveRequest(Long subscriberId, Long bloggerId);
+
     List<SubscriptionRequestDto> updateSubscriptionRequest(Long bloggerId, Long requestId, Boolean isConfirmed,
                                                            Boolean isAnswerSubscription);
 
     List<SubscriptionRequestDto> findRequests(Long bloggerId, Boolean isIncoming);
+
+    SubscriptionRequestDto cancelRequest(Long bloggerId, Long requestId);
 }

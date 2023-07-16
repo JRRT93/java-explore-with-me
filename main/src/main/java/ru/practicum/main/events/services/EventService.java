@@ -24,4 +24,8 @@ public interface EventService {
 
     List<EventFullDto> findFullEvents(List<Long> users, List<String> states, List<Long> categories,
                                       LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
+
+    List<EventShortDto> findBloggersCreatedEvents(Long subscriberId, Long bloggerId, Pageable pageable);
+
+    List<EventShortDto> findBloggersParticipationEvents(Long subscriberId, Long bloggerId, Pageable pageable);
 }

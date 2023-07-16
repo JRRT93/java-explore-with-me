@@ -75,6 +75,14 @@ public class SubscriptionRequestServiceImpl implements SubscriptionRequestServic
     }
 
     @Override
+    public SubscriptionRequestDto cancelRequest(Long bloggerId, Long requestId) {
+        checkAndGetUser(bloggerId);
+        SubscriptionRequest request = checkAndGetSubscriptionRequest(requestId);
+        request.setStatus(SubscriprionRequestStatus.CANCELED);
+        return mapper.modelToDto(repository.save(request));
+    }
+
+    @Override
     public List<SubscriptionRequestDto> findRequests(Long bloggerId, Boolean isIncoming) {
         checkAndGetUser(bloggerId);
         List<SubscriptionRequest> requestList;
