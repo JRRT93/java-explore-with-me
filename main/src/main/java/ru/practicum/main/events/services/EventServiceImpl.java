@@ -260,6 +260,12 @@ public class EventServiceImpl implements EventService {
         initialPrivacyCheck(blogger, subscriber);
         Set<Event> eventList;
 
+        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
+                blogger.getCreatedEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due BAN");
+        }
+
         if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
             if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
                 eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
@@ -282,7 +288,13 @@ public class EventServiceImpl implements EventService {
         initialPrivacyCheck(blogger, subscriber);
         Set<Event> eventList;
 
-        if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
+        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
+                blogger.getParticipationEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due BAN");
+        }
+
+        if (blogger.getParticipationEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
             if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
                 eventList = blogger.getConfirmedEvents();
             } else {
@@ -301,12 +313,6 @@ public class EventServiceImpl implements EventService {
         if (blogger.getSubscribers().stream().noneMatch(sub -> sub.getId().equals(subscriber.getId()))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
                     "unavailable due unsubscribe state");
-        }
-
-        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
-                blogger.getCreatedEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
-                    "unavailable due BAN");
         }
     }
 

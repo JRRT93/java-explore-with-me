@@ -9,6 +9,7 @@ import ru.practicum.main.subscriptionRequests.enums.SubscriprionRequestStatus;
 import ru.practicum.main.subscriptionRequests.mappers.SubscriptionRequestMapper;
 import ru.practicum.main.subscriptionRequests.model.SubscriptionRequest;
 import ru.practicum.main.subscriptionRequests.repositories.SubscriptionRequestJpaRepository;
+import ru.practicum.main.users.enums.SubscribersMode;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 
@@ -30,6 +31,15 @@ public class SubscriptionRequestServiceImpl implements SubscriptionRequestServic
         User blogger = checkAndGetUser(bloggerId);
         if (repository.existsByBloggerIdAndSubscriberId(bloggerId, subscriberId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Request is already exists");
+        }
+
+        if (blogger.getSubscribersMode().equals(SubscribersMode.PROHIBITED_FOR_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Subscription for User is not allowed");
+        }
+
+        if (blogger.getSubscribersMode().equals(SubscribersMode.PROHIBITED_FOR_NOT_FOLLOWED) &&
+                blogger.getBloggersSubscribed().stream().noneMatch(subscribedBlogger -> subscribedBlogger.getId().equals(subscriberId))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Subscription for User is not allowed");
         }
 
         SubscriptionRequest subscriptionRequest = SubscriptionRequest.builder()

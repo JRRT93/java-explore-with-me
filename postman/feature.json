@@ -1,0 +1,3578 @@
+{
+	"info": {
+		"_postman_id": "6d4340da-4498-4ff3-b828-835caa9b6a25",
+		"name": "Test Explore With Me - subscriptions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25884861"
+	},
+	"item": [
+		{
+			"name": "Запросы на подписку и списки подписок",
+			"item": [
+				{
+					"name": "Добавление заявки на подписку",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(201);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"var query = {};\r",
+									"pm.request.url.query.all().forEach((param) => { query[param.key] = param.value});\r",
+									"\r",
+									"pm.test(\"Запрос подписки должен содержать поля: id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target).to.have.property('id');\r",
+									"pm.expect(target).to.have.property('subscriber');\r",
+									"pm.expect(target).to.have.property('blogger');\r",
+									"pm.expect(target).to.have.property('status');\r",
+									"pm.expect(target).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"При создании запроса подписки должен быть статус PENDING\", function () {\r",
+									"    pm.expect(target.status).equal(\"PENDING\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Повторная заявка на подписку",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение входящих запросов подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber1 = await api.addUser(rnd.getUser());\r",
+									"        const subscriber2 = await api.addUser(rnd.getUser());\r",
+									"        const subscriber3 = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        const requestToJoin1 = await api.publishSubscriptionRequest(subscriber1.id, blogger.id);\r",
+									"        const requestToJoin2 = await api.publishSubscriptionRequest(subscriber2.id, blogger.id);\r",
+									"        const requestToJoin3 = await api.publishSubscriptionRequest(subscriber3.id, blogger.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('subscriber');\r",
+									"pm.expect(target[0]).to.have.property('blogger');\r",
+									"pm.expect(target[0]).to.have.property('status');\r",
+									"pm.expect(target[0]).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[0].status).equal(\"PENDING\");\r",
+									"});\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[1].status).equal(\"PENDING\");\r",
+									"});\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[2].status).equal(\"PENDING\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все входящие запросы\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество запросов должно быть равно 3').to.eql(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests?incoming=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение пустого перечня входящих запросов подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все входящие запросы\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Не должно быть запросов').to.eql(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests?incoming=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение исходящих запросов подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger1 = await api.addUser(rnd.getUser());\r",
+									"        const blogger2 = await api.addUser(rnd.getUser());\r",
+									"        const blogger3 = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        const requestToJoin1 = await api.publishSubscriptionRequest(subscriber.id, blogger1.id);\r",
+									"        const requestToJoin2 = await api.publishSubscriptionRequest(subscriber.id, blogger2.id);\r",
+									"        const requestToJoin3 = await api.publishSubscriptionRequest(subscriber.id, blogger3.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('bloggerId', subscriber.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('subscriber');\r",
+									"pm.expect(target[0]).to.have.property('blogger');\r",
+									"pm.expect(target[0]).to.have.property('status');\r",
+									"pm.expect(target[0]).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[0].status).equal(\"PENDING\");\r",
+									"});\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[1].status).equal(\"PENDING\");\r",
+									"});\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(target[2].status).equal(\"PENDING\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все исходящие запросы\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество запросов должно быть равно 3').to.eql(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests?incoming=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение пустого перечня исходящих запросов подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все входящие запросы\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Не должно быть запросов').to.eql(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests?incoming=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение статуса. Подтверждение заявки подписки без ответной заявки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('requestId', requestToJoin.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json()[0];\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target).to.have.property('id');\r",
+									"pm.expect(target).to.have.property('subscriber');\r",
+									"pm.expect(target).to.have.property('blogger');\r",
+									"pm.expect(target).to.have.property('status');\r",
+									"pm.expect(target).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"    pm.expect(source.id).equal(target.id, 'Id запроса на подписку должен соответствовать Id запроса после изменения статуса');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(source.status).equal(\"PENDING\");\r",
+									"    pm.expect(target.status).equal(\"CONFIRMED\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests/:requestId?confirmed=true&answerSubscribe=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests",
+								":requestId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "true"
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "requestId",
+									"value": "{{requestId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение статуса. Отклонение заявки подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('requestId', requestToJoin.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('subscriber');\r",
+									"pm.expect(target[0]).to.have.property('blogger');\r",
+									"pm.expect(target[0]).to.have.property('status');\r",
+									"pm.expect(target[0]).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"    pm.expect(source.id).equal(target[0].id, 'Название события должно соответствовать названию события с указанным идентификатором');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(source.status).equal(\"PENDING\");\r",
+									"    pm.expect(target[0].status).equal(\"REJECTED\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests/:requestId?confirmed=false&answerSubscribe=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests",
+								":requestId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "false"
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "requestId",
+									"value": "{{requestId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение статуса. Подтверждение заявки подписки + ответная заявка",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('requestId', requestToJoin.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('subscriber');\r",
+									"pm.expect(target[0]).to.have.property('blogger');\r",
+									"pm.expect(target[0]).to.have.property('status');\r",
+									"pm.expect(target[0]).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"    pm.expect(source.id).equal(target[0].id, 'Id запроса на подписку должен соответствовать Id запроса после изменения статуса');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(source.status).equal(\"PENDING\");\r",
+									"    pm.expect(target[0].status).equal(\"CONFIRMED\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться два запроса - утвержденный и ответный запрос на подписку\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество запросов должно быть равно 2').to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests/:requestId?confirmed=true&answerSubscribe=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests",
+								":requestId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "true"
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "requestId",
+									"value": "{{requestId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение статуса. Попытка изменения не тем юзером, на которого пытаются подписаться",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const anotherUser = await api.addUser(rnd.getUser());\r",
+									"        \r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('requestId', requestToJoin.id);\r",
+									"        pm.collectionVariables.set('bloggerId', anotherUser.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.badRequest;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/requests/:requestId?confirmed=true&answerSubscribe=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"requests",
+								":requestId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "true"
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "requestId",
+									"value": "{{requestId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Отмена своего запроса подписки",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        pm.collectionVariables.set('requestId', requestToJoin.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Запрос на подписку должен содержать поля:id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target).to.have.property('id');\r",
+									"pm.expect(target).to.have.property('subscriber');\r",
+									"pm.expect(target).to.have.property('blogger');\r",
+									"pm.expect(target).to.have.property('status');\r",
+									"pm.expect(target).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"    pm.expect(source.id).equal(target.id, 'Id запроса на подписку должен соответствовать Id запроса после изменения статуса');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Запрос на участие должен иметь статус PENDING при создании и статус CONFIRMED после выполнения запроса\", function () {\r",
+									"    pm.expect(source.status).equal(\"PENDING\");\r",
+									"    pm.expect(target.status).equal(\"CANCELED\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/:requestId/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								":requestId",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "requestId",
+									"value": "{{requestId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка утверждённых подписчиков",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber1 = await api.addUser(rnd.getUser());\r",
+									"        const subscriber2 = await api.addUser(rnd.getUser());\r",
+									"        const subscriber3 = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        const requestSub1 = await api.publishSubscriptionRequest(subscriber1.id, blogger.id);\r",
+									"        const requestSub2 = await api.publishSubscriptionRequest(subscriber2.id, blogger.id);\r",
+									"        const requestSub3 = await api.publishSubscriptionRequest(subscriber3.id, blogger.id);\r",
+									"\r",
+									"        const approvedRequest1 = await api.acceptSubscriptionRequest(blogger.id, requestSub1.id);\r",
+									"        const approvedRequest2 = await api.acceptSubscriptionRequest(blogger.id, requestSub2.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO подписчиков утвержденных блоггером должен содержать поля:id, name\", function () {\r",
+									"pm.expect(target[0]).to.have.property('name');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все утверждённые подписчики данного блоггера и не должно быть неутверждённых\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество подписчиков должно быть равно 2').to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions?incoming=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка утверждённых подписок",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger1 = await api.addUser(rnd.getUser());\r",
+									"        const blogger2 = await api.addUser(rnd.getUser());\r",
+									"        const blogger3 = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        const requestSub1 = await api.publishSubscriptionRequest(subscriber.id, blogger1.id);\r",
+									"        const requestSub2 = await api.publishSubscriptionRequest(subscriber.id, blogger2.id);\r",
+									"        const requestSub3 = await api.publishSubscriptionRequest(subscriber.id, blogger3.id);\r",
+									"\r",
+									"        const approvedRequest1 = await api.acceptSubscriptionRequest(blogger1.id, requestSub1.id);\r",
+									"        const approvedRequest2 = await api.acceptSubscriptionRequest(blogger2.id, requestSub2.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('bloggerId', subscriber.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO подтвержденных другими блоггерами подписок должен содержать поля:id, name\", function () {\r",
+									"pm.expect(target[0]).to.have.property('name');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все подтвержденные другими блоггерами подписки данного пользователя и не должно быть неподтверждённых\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество подписок должно быть равно 2').to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions?incoming=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions"
+							],
+							"query": [
+								{
+									"key": "incoming",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Настройки конфиденциальности блоггером",
+			"item": [
+				{
+					"name": "Изменение настроек приватности пользователя",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('response', blogger);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(200);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"var query = {};\r",
+									"pm.request.url.query.all().forEach((param) => { query[param.key] = param.value});\r",
+									"\r",
+									"pm.test(\"Запрос подписки должен содержать поля: subscribersMode, createdEventVisionMode, participationEventVisionMode\", function () {\r",
+									"pm.expect(target).to.have.property('subscribersMode');\r",
+									"pm.expect(target).to.have.property('createdEventVisionMode');\r",
+									"pm.expect(target).to.have.property('participationEventVisionMode');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Настройка режима подписок ALLOWED_FOR_ALL при создании и  PROHIBITED_FOR_NOT_FOLLOWED после выполнения запроса\", function () {\r",
+									"    pm.expect(target.subscribersMode).equal(\"PROHIBITED_FOR_NOT_FOLLOWED\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Отображения созданных событий FOR_ALL_SUBSCRIBERS при создании и  FOR_MUTUAL_SUBSCRIPTION после выполнения запроса\", function () {\r",
+									"    pm.expect(target.createdEventVisionMode).equal(\"FOR_MUTUAL_SUBSCRIPTION\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Отображения посещаемых событий FOR_ALL_SUBSCRIBERS при создании и  DONT_SHOW_TO_ALL после выполнения запроса\", function () {\r",
+									"    pm.expect(target.participationEventVisionMode).equal(\"DONT_SHOW_TO_ALL\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"subscribersMode\": \"PROHIBITED_FOR_NOT_FOLLOWED\",\r\n    \"createdEventVisionMode\": \"FOR_MUTUAL_SUBSCRIPTION\",\r\n    \"participationEventVisionMode\": \"DONT_SHOW_TO_ALL\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/privacyConfig",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"privacyConfig"
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничения взаимной подписке. Взаимная подписка отсутсвует",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        const config = {\r",
+									"            \"subscribersMode\": \"PROHIBITED_FOR_NOT_FOLLOWED\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничения взаимной подписке. Взаимная подписка присутсвует",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        const config = {\r",
+									"            \"subscribersMode\": \"PROHIBITED_FOR_NOT_FOLLOWED\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(blogger.id, subscriber.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(subscriber.id, requestToJoin.id);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(201);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"var query = {};\r",
+									"pm.request.url.query.all().forEach((param) => { query[param.key] = param.value});\r",
+									"\r",
+									"pm.test(\"Запрос подписки должен содержать поля: id, subscriber, blogger, status, created\", function () {\r",
+									"pm.expect(target).to.have.property('id');\r",
+									"pm.expect(target).to.have.property('subscriber');\r",
+									"pm.expect(target).to.have.property('blogger');\r",
+									"pm.expect(target).to.have.property('status');\r",
+									"pm.expect(target).to.have.property('created');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"При создании запроса подписки должен быть статус PENDING\", function () {\r",
+									"    pm.expect(target.status).equal(\"PENDING\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничения - подписки запрещены",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        const config = {\r",
+									"            \"subscribersMode\": \"PROHIBITED_FOR_ALL\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(blogger.id, subscriber.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(subscriber.id, requestToJoin.id);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение видимости событий. Добавление подписчика в БАН",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('response', approvedRequest);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const source = pm.collectionVariables.get('response');\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO для забанненого пользователя должен содержать поля:id, name\", function () {\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('name');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все пользователи в черном списке\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество пользователей должно быть равно 1').to.eql(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/blacklist/:subscriberId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"blacklist",
+								":subscriberId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "false",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение видимости событий. Добавление НЕ подписчика в БАН",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const anotherUser = await api.addUser(rnd.getUser());\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', anotherUser.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        pm.collectionVariables.set('response', approvedRequest);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:bloggerId/subscriptions/blacklist/:subscriberId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":bloggerId",
+								"subscriptions",
+								"blacklist",
+								":subscriberId"
+							],
+							"query": [
+								{
+									"key": "confirmed",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "answerSubscribe",
+									"value": "false",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								},
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								}
+							]
+						},
+						"description": "Обратите внимание:\n- если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется\n- нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие\n- статус можно изменить только у заявок, находящихся в состоянии ожидания\n- если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить"
+					},
+					"response": []
+				},
+				{
+					"name": "Подписчик в БАНЕ. Получение списка созданных событий блоггером",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        const category1 = await api.addCategory(rnd.getCategory());\r",
+									"        const event1 = await api.addEvent(blogger.id, rnd.getEvent(category1.id));\r",
+									"        const category2 = await api.addCategory(rnd.getCategory());\r",
+									"        const event2 = await api.addEvent(blogger.id, rnd.getEvent(category2.id));\r",
+									"        await api.publishEvent(event1.id);\r",
+									"        await api.publishEvent(event2.id);\r",
+									"\r",
+									"        await api.subToBlackList(blogger.id, subscriber.id);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/created",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"created"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Подписчик в БАНЕ. Получение списка событий, в которых участвует блоггер",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const eventInitiator = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestSub.id);\r",
+									"\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = true\r",
+									"        let event = await api.addEvent(eventInitiator.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const requestToJoin = await api.publishParticipationRequest(event.id, blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"        await api.acceptParticipationRequest(event.id, eventInitiator.id, requestToJoin.id);\r",
+									"        await api.subToBlackList(blogger.id, subscriber.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/participation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"participation"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничение взаимной подписки. Взаимная подписка отсутсвует. Получение списка созданных событий блоггером",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        const category1 = await api.addCategory(rnd.getCategory());\r",
+									"        const event1 = await api.addEvent(blogger.id, rnd.getEvent(category1.id));\r",
+									"        const category2 = await api.addCategory(rnd.getCategory());\r",
+									"        const event2 = await api.addEvent(blogger.id, rnd.getEvent(category2.id));\r",
+									"        await api.publishEvent(event1.id);\r",
+									"        await api.publishEvent(event2.id);\r",
+									"\r",
+									"        const config = {\r",
+									"            \"createdEventVisionMode\": \"FOR_MUTUAL_SUBSCRIPTION\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/created",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"created"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничение взаимной подписки. Взаимная подписка присутсвует. Получение списка созданных событий блоггером",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"        \r",
+									"        const requestToJoin1 = await api.publishSubscriptionRequest(blogger.id, subscriber.id);\r",
+									"        const approvedRequest1 = await api.acceptSubscriptionRequest(subscriber.id, requestToJoin1.id);\r",
+									"\r",
+									"        const category1 = await api.addCategory(rnd.getCategory());\r",
+									"        const event1 = await api.addEvent(blogger.id, rnd.getEvent(category1.id));\r",
+									"        const category2 = await api.addCategory(rnd.getCategory());\r",
+									"        const event2 = await api.addEvent(blogger.id, rnd.getEvent(category2.id));\r",
+									"        await api.publishEvent(event1.id);\r",
+									"        await api.publishEvent(event2.id);\r",
+									"\r",
+									"        const config = {\r",
+									"            \"createdEventVisionMode\": \"FOR_MUTUAL_SUBSCRIPTION\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO собыйтий созданных блоггером должен содержать поля:id, annotation, category, confirmedRequests, eventDate, initiator, paid, title, views\", function () {\r",
+									"pm.expect(target[0]).to.have.property('annotation');\r",
+									"pm.expect(target[0]).to.have.property('category');\r",
+									"pm.expect(target[0]).to.have.property('confirmedRequests');\r",
+									"pm.expect(target[0]).to.have.property('eventDate');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('initiator');\r",
+									"pm.expect(target[0]).to.have.property('paid');\r",
+									"pm.expect(target[0]).to.have.property('title');\r",
+									"pm.expect(target[0]).to.have.property('views');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все опубликованные события данного блоггера\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество событий должно быть равно 2').to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/created",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"created"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничение взаимной подписки. Взаимная подписка отсутсвует. Получение списка событий, в которых участвует блоггер",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const eventInitiator = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestSub.id);\r",
+									"\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = true\r",
+									"        let event = await api.addEvent(eventInitiator.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const requestToJoin = await api.publishParticipationRequest(event.id, blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"        await api.acceptParticipationRequest(event.id, eventInitiator.id, requestToJoin.id);\r",
+									"        \r",
+									"        const config = {\r",
+									"            \"participationEventVisionMode\": \"FOR_MUTUAL_SUBSCRIPTION\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/participation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"participation"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ограничение взаимной подписки. Взаимная подписка присутсвует. Получение списка событий, в которых участвует блоггер",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const eventInitiator = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestSub.id);\r",
+									"        const requestToJoin1 = await api.publishSubscriptionRequest(blogger.id, subscriber.id);\r",
+									"        const approvedRequest1 = await api.acceptSubscriptionRequest(subscriber.id, requestToJoin1.id);\r",
+									"\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = true\r",
+									"        let event = await api.addEvent(eventInitiator.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const requestToJoin = await api.publishParticipationRequest(event.id, blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"        await api.acceptParticipationRequest(event.id, eventInitiator.id, requestToJoin.id);\r",
+									"        \r",
+									"        const config = {\r",
+									"            \"participationEventVisionMode\": \"FOR_MUTUAL_SUBSCRIPTION\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO собыйтий созданных блоггером должен содержать поля:id, annotation, category, confirmedRequests, eventDate, initiator, paid, title, views\", function () {\r",
+									"pm.expect(target[0]).to.have.property('annotation');\r",
+									"pm.expect(target[0]).to.have.property('category');\r",
+									"pm.expect(target[0]).to.have.property('confirmedRequests');\r",
+									"pm.expect(target[0]).to.have.property('eventDate');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('initiator');\r",
+									"pm.expect(target[0]).to.have.property('paid');\r",
+									"pm.expect(target[0]).to.have.property('title');\r",
+									"pm.expect(target[0]).to.have.property('views');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все опубликованные события данного блоггера\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество событий должно быть равно 1').to.eql(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/participation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"participation"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Полный запрет. Получение списка созданных событий блоггером",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        const category1 = await api.addCategory(rnd.getCategory());\r",
+									"        const event1 = await api.addEvent(blogger.id, rnd.getEvent(category1.id));\r",
+									"        const category2 = await api.addCategory(rnd.getCategory());\r",
+									"        const event2 = await api.addEvent(blogger.id, rnd.getEvent(category2.id));\r",
+									"        await api.publishEvent(event1.id);\r",
+									"        await api.publishEvent(event2.id);\r",
+									"\r",
+									"        const config = {\r",
+									"            \"createdEventVisionMode\": \"DONT_SHOW_TO_ALL\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/created",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"created"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Полный запрет. Получение списка событий, в которых участвует блоггер",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const eventInitiator = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestSub.id);\r",
+									"\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = true\r",
+									"        let event = await api.addEvent(eventInitiator.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const requestToJoin = await api.publishParticipationRequest(event.id, blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"        await api.acceptParticipationRequest(event.id, eventInitiator.id, requestToJoin.id);\r",
+									"        \r",
+									"        const config = {\r",
+									"            \"participationEventVisionMode\": \"DONT_SHOW_TO_ALL\"\r",
+									"            };\r",
+									"        await api.changePrivacyConfig(blogger.id, config);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(409);   \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/participation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"participation"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Получение списка событий подписчиком",
+			"item": [
+				{
+					"name": "Получение списка созданных событий блоггером",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestToJoin = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestToJoin.id);\r",
+									"\r",
+									"        const category1 = await api.addCategory(rnd.getCategory());\r",
+									"        const event1 = await api.addEvent(blogger.id, rnd.getEvent(category1.id));\r",
+									"        const category2 = await api.addCategory(rnd.getCategory());\r",
+									"        const event2 = await api.addEvent(blogger.id, rnd.getEvent(category2.id));\r",
+									"        await api.publishEvent(event1.id);\r",
+									"        await api.publishEvent(event2.id);\r",
+									"\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO собыйтий созданных блоггером должен содержать поля:id, annotation, category, confirmedRequests, eventDate, initiator, paid, title, views\", function () {\r",
+									"pm.expect(target[0]).to.have.property('annotation');\r",
+									"pm.expect(target[0]).to.have.property('category');\r",
+									"pm.expect(target[0]).to.have.property('confirmedRequests');\r",
+									"pm.expect(target[0]).to.have.property('eventDate');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('initiator');\r",
+									"pm.expect(target[0]).to.have.property('paid');\r",
+									"pm.expect(target[0]).to.have.property('title');\r",
+									"pm.expect(target[0]).to.have.property('views');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все опубликованные события данного блоггера\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество событий должно быть равно 2').to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/created",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"created"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка событий, в которых участвует блоггер",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const blogger = await api.addUser(rnd.getUser());\r",
+									"        const subscriber = await api.addUser(rnd.getUser());\r",
+									"        const eventInitiator = await api.addUser(rnd.getUser());\r",
+									"\r",
+									"        pm.collectionVariables.set('subscriberId', subscriber.id);\r",
+									"        pm.collectionVariables.set('bloggerId', blogger.id);\r",
+									"\r",
+									"        const requestSub = await api.publishSubscriptionRequest(subscriber.id, blogger.id);\r",
+									"        const approvedRequest = await api.acceptSubscriptionRequest(blogger.id, requestSub.id);\r",
+									"\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = true\r",
+									"        let event = await api.addEvent(eventInitiator.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const requestToJoin = await api.publishParticipationRequest(event.id, blogger.id);\r",
+									"        pm.collectionVariables.set('response', requestToJoin);\r",
+									"        /*pm.request.body.update({\r",
+									"            mode: 'raw',\r",
+									"            raw: JSON.stringify({requestIds: [requestToJoin.id],\r",
+									"            status:\"CONFIRMED\"}),\r",
+									"            options: { raw: { language: 'json' } }\r",
+									"        });*/\r",
+									"        await api.acceptParticipationRequest(event.id, eventInitiator.id, requestToJoin.id);\r",
+									"        \r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.be.ok;    \r",
+									"    pm.response.to.be.withBody;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"DTO собыйтий созданных блоггером должен содержать поля:id, annotation, category, confirmedRequests, eventDate, initiator, paid, title, views\", function () {\r",
+									"pm.expect(target[0]).to.have.property('annotation');\r",
+									"pm.expect(target[0]).to.have.property('category');\r",
+									"pm.expect(target[0]).to.have.property('confirmedRequests');\r",
+									"pm.expect(target[0]).to.have.property('eventDate');\r",
+									"pm.expect(target[0]).to.have.property('id');\r",
+									"pm.expect(target[0]).to.have.property('initiator');\r",
+									"pm.expect(target[0]).to.have.property('paid');\r",
+									"pm.expect(target[0]).to.have.property('title');\r",
+									"pm.expect(target[0]).to.have.property('views');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"В ответе должны содержаться все опубликованные события данного блоггера\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length, 'Количество событий должно быть равно 1').to.eql(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:subscriberId/subscriptions/:bloggerId/participation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":subscriberId",
+								"subscriptions",
+								":bloggerId",
+								"participation"
+							],
+							"variable": [
+								{
+									"key": "subscriberId",
+									"value": "{{subscriberId}}"
+								},
+								{
+									"key": "bloggerId",
+									"value": "{{bloggerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"API = class {",
+					"    constructor(postman, verbose = false, baseUrl = \"http://localhost:8080\") {",
+					"        this.baseUrl = baseUrl;",
+					"        this.pm = postman;",
+					"        this._verbose = verbose;",
+					"    }",
+					"",
+					"    async addUser(user, verbose=null) {",
+					"        return this.post(\"/admin/users\", user, \"Ошибка при добавлении нового пользователя: \", verbose);",
+					"    }",
+					"",
+					"    async addCategory(category, verbose=null) {",
+					"        return this.post(\"/admin/categories\", category, \"Ошибка при добавлении новой категории: \", verbose);",
+					"    }",
+					"",
+					"    async addEvent(userId, event, verbose=null) {",
+					"        return this.post(\"/users/\" + userId + \"/events\", event, \"Ошибка при добавлении нового события: \", verbose);",
+					"    }",
+					"",
+					"    async addCompilation(compilation, verbose=null) {",
+					"        return this.post(\"/admin/compilations\", compilation, \"Ошибка при добавлении новой подборки: \", verbose);",
+					"    }",
+					"",
+					"    async publishParticipationRequest(eventId, userId, verbose=null) {",
+					"        return this.post('/users/' + userId + '/requests?eventId=' + eventId, null, \"Ошибка при добавлении нового запроса на участие в событии\", verbose);",
+					"    }",
+					"",
+					"    async publishSubscriptionRequest(subscriberId, bloggerId, verbose=null) {",
+					"        return this.post('/users/' + subscriberId + '/subscriptions/' + bloggerId, null, \"Ошибка при добавлении нового запроса на участие в событии\", verbose);",
+					"    }",
+					"",
+					"    async publishEvent(eventId, verbose=null) {",
+					"        return this.patch('/admin/events/' + eventId, {stateAction: \"PUBLISH_EVENT\"}, \"Ошибка при публикации события\", verbose);",
+					"    }",
+					"    ",
+					"    async rejectEvent(eventId, verbose=null) {",
+					"        return this.patch('/admin/events/' + eventId, {stateAction: \"REJECT_EVENT\"}, \"Ошибка при отмене события\", verbose);",
+					"    }",
+					"",
+					"    async subToBlackList(bloggerId, subscriberId, verbose=null) {",
+					"        return this.patch('/users/' + bloggerId + '/subscriptions/blacklist/' + subscriberId, null, \"Ошибка при отмене события\", verbose);",
+					"    }",
+					"",
+					"    async changePrivacyConfig(bloggerId, config, verbose=null) {",
+					"        return this.patch('/users/' + bloggerId + '/subscriptions/privacyConfig', config, \"Ошибка при отмене события\", verbose);",
+					"    }",
+					"",
+					"    async acceptParticipationRequest(eventId, userId, reqId, verbose=null) {",
+					"        return this.patch('/users/' + userId + '/events/' + eventId + '/requests/', {requestIds:[reqId], status: \"CONFIRMED\"}, \"Ошибка при принятии заявки на участие в событии\", verbose);",
+					"    }",
+					"",
+					"    async acceptSubscriptionRequest(bloggerId, requestId, verbose=null) {",
+					"        return this.patch('/users/' + bloggerId + '/subscriptions/requests/' + requestId + '?confirmed=true&answerSubscribe=false', null, \"Ошибка при принятии заявки на участие в событии\", verbose);",
+					"    }",
+					"",
+					"    async findCategory(catId, verbose=null) {",
+					"        return this.get('/categories/' + catId, null, \"Ошибка при поиске категории по id\", verbose);",
+					"    }",
+					"",
+					"    async findCompilation(compId, verbose=null) {",
+					"        return this.get('/compilations/' + compId, null, \"Ошибка при поиске подборки по id\", verbose);",
+					"    }",
+					"",
+					"    async findEvent(eventId, verbose=null) {",
+					"        return this.get('/events/' + eventId, null, \"Ошибка при поиске события по id\", verbose);",
+					"    }",
+					"",
+					"    async findUser(userId, verbose=null) {",
+					"        return this.get('/admin/users?ids=' + userId, null, \"Ошибка при поиске пользователя по id\", verbose);",
+					"    }",
+					"",
+					"    async post(path, body, errorText = \"Ошибка при выполнении post-запроса: \", verbose=null) {",
+					"        return this.sendRequest(\"POST\", path, body, errorText, verbose);",
+					"    }",
+					"",
+					"    async patch(path, body = null, errorText = \"Ошибка при выполнении patch-запроса: \", verbose=null) {",
+					"        return this.sendRequest(\"PATCH\", path, body, errorText, verbose);",
+					"    }",
+					"",
+					"    async get(path, body = null, errorText = \"Ошибка при выполнении get-запроса: \", verbose=null) {",
+					"        return this.sendRequest(\"GET\", path, body, errorText, verbose);",
+					"    }",
+					"",
+					"    async sendRequest(method, path, body=null, errorText = \"Ошибка при выполнении запроса: \", verbose=null) {",
+					"        return new Promise((resolve, reject) => {",
+					"            verbose = verbose == null ? this._verbose : verbose;",
+					"",
+					"            const request = {",
+					"                url: this.baseUrl + path,",
+					"                method: method,",
+					"                body: body == null ? \"\" : JSON.stringify(body),",
+					"                header: { \"Content-Type\": \"application/json\" },",
+					"            };",
+					"",
+					"            if(verbose) {",
+					"                console.log(\"Отправляю запрос: \", request);",
+					"            }",
+					"",
+					"            try {",
+					"                this.pm.sendRequest(request, (error, response) => {",
+					"                    if(error || (response.code >= 400 && response.code <= 599)) {",
+					"                        let err = error ? error : JSON.stringify(response.json());",
+					"                        console.error(\"При выполнении запроса к серверу возникла ошика.\\n\", err,",
+					"                             \"\\nДля отладки проблемы повторите такой же запрос к вашей программе \" + ",
+					"                             \"на локальном компьютере. Данные запроса:\\n\", JSON.stringify(request));",
+					"",
+					"                        reject(new Error(errorText + err));",
+					"                    }",
+					"",
+					"                    if(verbose) {",
+					"                        console.log(\"Результат обработки запроса: код состояния - \", response.code, \", тело: \", response.json());",
+					"                    }",
+					"",
+					"                    resolve(response.json());",
+					"                });",
+					"            } catch(err) {",
+					"                if(verbose) {",
+					"                    console.error(errorText, err);",
+					"                }",
+					"                return Promise.reject(err);",
+					"            }",
+					"        });",
+					"    }",
+					"};",
+					"",
+					"RandomUtils = class {",
+					"    constructor() {}",
+					"",
+					"    getUser() {",
+					"        return {",
+					"            name: pm.variables.replaceIn('{{$randomFullName}}'),",
+					"            email: pm.variables.replaceIn('{{$randomEmail}}')",
+					"        };",
+					"    }",
+					"",
+					"    getCategory() {",
+					"        return {",
+					"            name: pm.variables.replaceIn('{{$randomWord}}') + Math.floor(Math.random() * 100).toString()",
+					"        };",
+					"    }",
+					"",
+					"    getEvent(categoryId) {",
+					"        return {",
+					"            annotation: pm.variables.replaceIn('{{$randomLoremParagraph}}'),",
+					"            category: categoryId,",
+					"            description: pm.variables.replaceIn('{{$randomLoremParagraphs}}'),",
+					"            eventDate: this.getFutureDateTime(),",
+					"            location: {",
+					"                lat: parseFloat(pm.variables.replaceIn('{{$randomLatitude}}')),",
+					"                lon: parseFloat(pm.variables.replaceIn('{{$randomLongitude}}')),",
+					"            },",
+					"            paid: pm.variables.replaceIn('{{$randomBoolean}}'),",
+					"            participantLimit: pm.variables.replaceIn('{{$randomInt}}'),",
+					"            requestModeration: pm.variables.replaceIn('{{$randomBoolean}}'),",
+					"            title: pm.variables.replaceIn('{{$randomLoremSentence}}'),",
+					"        }",
+					"    }",
+					"",
+					"    getCompilation(...eventIds) {",
+					"        return {",
+					"            title: pm.variables.replaceIn('{{$randomLoremSentence}}').slice(0, 50),",
+					"            pinned: pm.variables.replaceIn('{{$randomBoolean}}'),",
+					"            events: eventIds",
+					"        };",
+					"    }",
+					"",
+					"",
+					"    getFutureDateTime(hourShift = 5, minuteShift=0, yearShift=0) {",
+					"        let moment = require('moment');",
+					"",
+					"        let m = moment();",
+					"        m.add(hourShift, 'hour');",
+					"        m.add(minuteShift, 'minute');",
+					"        m.add(yearShift, 'year');",
+					"",
+					"        return m.format('YYYY-MM-DD HH:mm:ss');",
+					"    }",
+					"",
+					"    getWord(length = 1) {",
+					"        let result = '';",
+					"        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';",
+					"        const charactersLength = characters.length;",
+					"        let counter = 0;",
+					"        while (counter < length) {",
+					"            result += characters.charAt(Math.floor(Math.random() * charactersLength));",
+					"            counter += 1;",
+					"        }",
+					"        return result;",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "usersCount",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "catid",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "request_body",
+			"value": ""
+		},
+		{
+			"key": "mail",
+			"value": ""
+		},
+		{
+			"key": "response",
+			"value": ""
+		},
+		{
+			"key": "uid",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "catname",
+			"value": ""
+		},
+		{
+			"key": "eid",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "compid",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "toCheck",
+			"value": ""
+		},
+		{
+			"key": "newDataToSet",
+			"value": ""
+		},
+		{
+			"key": "uid1",
+			"value": ""
+		},
+		{
+			"key": "reqid",
+			"value": 1,
+			"type": "number"
+		},
+		{
+			"key": "catId",
+			"value": ""
+		},
+		{
+			"key": "confirmedRequests",
+			"value": ""
+		},
+		{
+			"key": "responseArr",
+			"value": ""
+		},
+		{
+			"key": "source1",
+			"value": ""
+		},
+		{
+			"key": "source2",
+			"value": ""
+		},
+		{
+			"key": "fromId",
+			"value": "0"
+		},
+		{
+			"key": "source",
+			"value": ""
+		},
+		{
+			"key": "subscriberId",
+			"value": ""
+		},
+		{
+			"key": "bloggerId",
+			"value": ""
+		},
+		{
+			"key": "requestId",
+			"value": ""
+		}
+	]
+}
