@@ -14,7 +14,6 @@ import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.mappers.EventMapper;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.events.repositories.EventJpaRepository;
-import ru.practicum.main.events.utils.EventUpdateUtil;
 import ru.practicum.main.locations.mappers.LocationMapper;
 import ru.practicum.main.locations.model.Location;
 import ru.practicum.main.locations.repositories.LocationJpaRepository;
@@ -87,8 +86,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
         checkAndGetUser(userId);
         Event eventForUpdate = checkAndGetEvent(eventId);
-        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUserRequest);
-        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+        eventForUpdate = eventMapper.mergeUserUpdate(eventUserRequest, eventForUpdate);
 
         if (eventUserRequest.getStateAction() != null) {
             switch (eventUserRequest.getStateAction()) {
@@ -130,8 +128,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUpdReqAdm);
-        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+        eventForUpdate = eventMapper.mergeAdminUpdate(eventUpdReqAdm, eventForUpdate);
 
         if (eventUpdReqAdm.getStateAction() != null) {
             switch (eventUpdReqAdm.getStateAction()) {

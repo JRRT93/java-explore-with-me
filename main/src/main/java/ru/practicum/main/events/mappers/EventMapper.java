@@ -1,7 +1,6 @@
 package ru.practicum.main.events.mappers;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import ru.practicum.main.categories.mappers.CategoryMapper;
 import ru.practicum.main.events.dto.*;
 import ru.practicum.main.events.model.Event;
@@ -22,7 +21,15 @@ public interface EventMapper {
 
     EventFullDto toEventFullDto(Event event);
 
-    EventSimpleFieldsForUpdate toSimpleEvent(UpdateEventUserRequest dto);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    Event mergeAdminUpdate(UpdateEventAdminRequest updateDto, @MappingTarget Event event);
 
-    EventSimpleFieldsForUpdate toSimpleEvent(UpdateEventAdminRequest dto);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    Event mergeUserUpdate(UpdateEventUserRequest updateDto, @MappingTarget Event event);
 }
