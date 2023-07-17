@@ -260,14 +260,14 @@ public class EventServiceImpl implements EventService {
         initialPrivacyCheck(blogger, subscriber);
         Set<Event> eventList;
 
-        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
+        if (isSetContainsUserId(blogger.getEventVisionBlackList(), subscriberId) ||
                 blogger.getCreatedEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
                     "unavailable due BAN");
         }
 
         if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
-            if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
+            if (isSetContainsUserId(subscriber.getSubscribers(), bloggerId)) {
                 eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
             } else {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
@@ -288,14 +288,14 @@ public class EventServiceImpl implements EventService {
         initialPrivacyCheck(blogger, subscriber);
         Set<Event> eventList;
 
-        if (blogger.getEventVisionBlackList().stream().anyMatch(bannedSubscriber -> bannedSubscriber.getId().equals(subscriber.getId())) ||
+        if (isSetContainsUserId(blogger.getEventVisionBlackList(), subscriberId) ||
                 blogger.getParticipationEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
                     "unavailable due BAN");
         }
 
         if (blogger.getParticipationEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
-            if (subscriber.getSubscribers().stream().anyMatch(sub -> sub.getId().equals(bloggerId))) {
+            if (isSetContainsUserId(subscriber.getSubscribers(), bloggerId)) {
                 eventList = blogger.getConfirmedEvents();
             } else {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
@@ -309,8 +309,13 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    private boolean isSetContainsUserId(Set<User> targetSet, Long checkedId) {
+        Set<Long> idSet = targetSet.stream().map(User::getId).collect(Collectors.toSet());
+        return idSet.contains(checkedId);
+    }
+
     private void initialPrivacyCheck(User blogger, User subscriber) {
-        if (blogger.getSubscribers().stream().noneMatch(sub -> sub.getId().equals(subscriber.getId()))) {
+        if (!isSetContainsUserId(blogger.getSubscribers(), subscriber.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
                     "unavailable due unsubscribe state");
         }

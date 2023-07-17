@@ -17,6 +17,7 @@ import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,7 +87,8 @@ public class UserServiceImpl implements UserService {
     public List<UserShortDto> putSubscriberInBlackList(Long bloggerId, Long subscriberId) {
         User blogger = checkAndGetUser(bloggerId);
         User subscriberForBan = checkAndGetUser(subscriberId);
-        if (blogger.getSubscribers().stream().anyMatch(subscriber -> subscriber.getId().equals(subscriberId))) {
+        Set<Long> subscribers = blogger.getSubscribers().stream().map(User::getId).collect(Collectors.toSet());
+        if (subscribers.contains(subscriberId)) {
             blogger.getEventVisionBlackList().add(subscriberForBan);
             repository.save(blogger);
             return blogger.getEventVisionBlackList().stream()
