@@ -14,10 +14,10 @@ import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.mappers.EventMapper;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.events.repositories.EventJpaRepository;
-import ru.practicum.main.events.utils.EventUpdateUtil;
 import ru.practicum.main.locations.mappers.LocationMapper;
 import ru.practicum.main.locations.model.Location;
 import ru.practicum.main.locations.repositories.LocationJpaRepository;
+import ru.practicum.main.users.enums.EventVisionMode;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 import ru.practicum.stats.client.StatsClient;
@@ -26,6 +26,8 @@ import ru.practicum.stats.dto.StatRecordOut;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,8 +86,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventByOwner(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
         checkAndGetUser(userId);
         Event eventForUpdate = checkAndGetEvent(eventId);
-        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUserRequest);
-        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+        eventForUpdate = eventMapper.mergeUserUpdate(eventUserRequest, eventForUpdate);
 
         if (eventUserRequest.getStateAction() != null) {
             switch (eventUserRequest.getStateAction()) {
@@ -127,8 +128,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        EventSimpleFieldsForUpdate simpleEvent = eventMapper.toSimpleEvent(eventUpdReqAdm);
-        EventUpdateUtil.simpleUpdateEvent(simpleEvent, eventForUpdate);
+        eventForUpdate = eventMapper.mergeAdminUpdate(eventUpdReqAdm, eventForUpdate);
 
         if (eventUpdReqAdm.getStateAction() != null) {
             switch (eventUpdReqAdm.getStateAction()) {
@@ -250,6 +250,74 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(event);
     }
 
+    @Override
+    public List<EventShortDto> findBloggersCreatedEvents(Long subscriberId, Long bloggerId, Pageable pageable) {
+        User blogger = checkAndGetUser(bloggerId);
+        User subscriber = checkAndGetUser(subscriberId);
+        initialPrivacyCheck(blogger, subscriber);
+        Set<Event> eventList;
+
+        if (isSetContainsUserId(blogger.getEventVisionBlackList(), subscriberId) ||
+                blogger.getCreatedEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due BAN");
+        }
+
+        if (blogger.getCreatedEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
+            if (isSetContainsUserId(subscriber.getSubscribers(), bloggerId)) {
+                eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                        "unavailable due lack of mutual subscription");
+            }
+        } else {
+            eventList = eventRepository.findAllByInitiatorIdAndState(bloggerId, PublicStatus.PUBLISHED, pageable).toSet();
+        }
+        return eventList.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventShortDto> findBloggersParticipationEvents(Long subscriberId, Long bloggerId, Pageable pageable) {
+        User blogger = checkAndGetUser(bloggerId);
+        User subscriber = checkAndGetUser(subscriberId);
+        initialPrivacyCheck(blogger, subscriber);
+        Set<Event> eventList;
+
+        if (isSetContainsUserId(blogger.getEventVisionBlackList(), subscriberId) ||
+                blogger.getParticipationEventVisionMode().equals(EventVisionMode.DONT_SHOW_TO_ALL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due BAN");
+        }
+
+        if (blogger.getParticipationEventVisionMode().equals(EventVisionMode.FOR_MUTUAL_SUBSCRIPTION)) {
+            if (isSetContainsUserId(subscriber.getSubscribers(), bloggerId)) {
+                eventList = blogger.getConfirmedEvents();
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                        "unavailable due lack of mutual subscription");
+            }
+        } else {
+            eventList = blogger.getConfirmedEvents();
+        }
+        return eventList.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isSetContainsUserId(Set<User> targetSet, Long checkedId) {
+        Set<Long> idSet = targetSet.stream().map(User::getId).collect(Collectors.toSet());
+        return idSet.contains(checkedId);
+    }
+
+    private void initialPrivacyCheck(User blogger, User subscriber) {
+        if (!isSetContainsUserId(blogger.getSubscribers(), subscriber.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Privacy conflict. Created events of this User is" +
+                    "unavailable due unsubscribe state");
+        }
+    }
+
     private Event checkAndGetEvent(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -257,11 +325,9 @@ public class EventServiceImpl implements EventService {
     }
 
     private Location checkAndGetLocation(Location locationToCheck) {
-        if (locationRepository.existsByLatAndLon(locationToCheck.getLat(), locationToCheck.getLon())) {
-            return locationToCheck;
-        } else {
-            return locationRepository.save(locationToCheck);
-        }
+        Optional<Location> foundLocation = locationRepository.findByLatAndLon(locationToCheck.getLat(),
+                locationToCheck.getLon());
+        return foundLocation.orElseGet(() -> locationRepository.save(locationToCheck));
     }
 
     private User checkAndGetUser(Long userId) {

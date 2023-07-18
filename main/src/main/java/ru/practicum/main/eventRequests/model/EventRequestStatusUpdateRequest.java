@@ -1,10 +1,10 @@
-package ru.practicum.main.requests.model;
+package ru.practicum.main.eventRequests.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.main.requests.enums.RequestStatus;
+import ru.practicum.main.eventRequests.enums.RequestStatus;
 
 import java.util.List;
 

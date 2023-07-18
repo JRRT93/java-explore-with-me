@@ -1,8 +1,7 @@
-package ru.practicum.main.requests.model;
+package ru.practicum.main.subscriptionRequests.model;
 
 import lombok.*;
-import ru.practicum.main.events.model.Event;
-import ru.practicum.main.requests.enums.RequestStatus;
+import ru.practicum.main.subscriptionRequests.enums.SubscriprionRequestStatus;
 import ru.practicum.main.users.model.User;
 
 import javax.persistence.*;
@@ -14,8 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "participation_request")
-public class ParticipationRequest {
+@Table(name = "subscriprion_request")
+public class SubscriptionRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,11 +22,11 @@ public class ParticipationRequest {
     private LocalDateTime created;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RequestStatus status;
+    private SubscriprionRequestStatus status;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @JoinColumn(name = "subscriber_id")
+    private User subscriber;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id")
-    private User requester;
+    @JoinColumn(name = "blogger_id")
+    private User blogger;
 }

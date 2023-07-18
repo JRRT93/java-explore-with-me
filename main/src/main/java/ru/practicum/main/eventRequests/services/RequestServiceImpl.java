@@ -1,19 +1,19 @@
-package ru.practicum.main.requests.services;
+package ru.practicum.main.eventRequests.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.main.eventRequests.dto.ParticipationRequestDto;
+import ru.practicum.main.eventRequests.enums.RequestStatus;
+import ru.practicum.main.eventRequests.mappers.RequestMapper;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateRequest;
+import ru.practicum.main.eventRequests.model.EventRequestStatusUpdateResult;
+import ru.practicum.main.eventRequests.model.ParticipationRequest;
+import ru.practicum.main.eventRequests.repositories.RequestJpaRepository;
 import ru.practicum.main.events.enums.PublicStatus;
 import ru.practicum.main.events.model.Event;
 import ru.practicum.main.events.repositories.EventJpaRepository;
-import ru.practicum.main.requests.dto.ParticipationRequestDto;
-import ru.practicum.main.requests.enums.RequestStatus;
-import ru.practicum.main.requests.mappers.RequestMapper;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateRequest;
-import ru.practicum.main.requests.model.EventRequestStatusUpdateResult;
-import ru.practicum.main.requests.model.ParticipationRequest;
-import ru.practicum.main.requests.repositories.RequestJpaRepository;
 import ru.practicum.main.users.model.User;
 import ru.practicum.main.users.repositories.UserJpaRepository;
 
@@ -59,6 +59,8 @@ public class RequestServiceImpl implements RequestService {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             request.setStatus(RequestStatus.CONFIRMED);
             eventRepository.save(event);
+            initiator.getConfirmedEvents().add(event);
+            userRepository.save(initiator);
         }
         return requestMapper.modelToDto(requestRepository.save(request));
     }
@@ -118,12 +120,16 @@ public class RequestServiceImpl implements RequestService {
                         req.setStatus(request.getStatus());
                         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                         confirmed.add(requestMapper.modelToDto(req));
+                        User participant = req.getRequester();
+                        participant.getConfirmedEvents().add(event);
+                        userRepository.save(participant);
                     } else {
                         req.setStatus(RequestStatus.REJECTED);
                         rejected.add(requestMapper.modelToDto(req));
                     }
                 })
                 .collect(Collectors.toList());
+
         eventRepository.save(event);
         requestRepository.saveAll(requests);
         return new EventRequestStatusUpdateResult(confirmed, rejected);

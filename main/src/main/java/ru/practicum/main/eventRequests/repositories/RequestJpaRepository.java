@@ -1,8 +1,8 @@
-package ru.practicum.main.requests.repositories;
+package ru.practicum.main.eventRequests.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.practicum.main.requests.model.ParticipationRequest;
+import ru.practicum.main.eventRequests.model.ParticipationRequest;
 
 import java.util.List;
 

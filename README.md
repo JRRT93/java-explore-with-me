@@ -1,2 +1,2 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
+[Ссылка на пул-реквест, открытый из ветки feature_subscriptions в main](https://github.com/JRRT93/java-explore-with-me/pull/5)
